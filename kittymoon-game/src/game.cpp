@@ -743,6 +743,17 @@ ACTION game::sellreward(
 
    asset quantity = asset(reward_token, config.get().CORE_TOKEN_SYMBOL);
 
+   rewards.modify(
+      it_reward,
+      player_account,
+      [&](auto& s) {
+         s.common    -= common;
+         s.uncommon  -= uncommon;
+         s.rare      -= rare;
+         s.legend    -= legendary;
+      }
+   );
+
    action(
       permission_level {
          get_self(),
