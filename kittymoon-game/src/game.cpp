@@ -715,6 +715,51 @@ ACTION game::harvesting(
    );
 }
 
+ACTION game::sellreward(
+   name        player_account,
+   uint32_t    common,
+   uint32_t    uncommon,
+   uint32_t    rare,
+   uint32_t    legendary
+) {
+   require_auth(player_account);
+
+   auto it_player = players.find(player_account.value);
+   check(it_player != players.end(), "not found player from account");
+
+   auto it_reward = rewards.find(player_account.value);
+   check(it_reward != rewards.end(), "not found rewards from account");
+
+   check(it_reward->common >= common, "not enough common reward");
+   check(it_reward->uncommon >= uncommon, "not enough uncommon reward");
+   check(it_reward->rare >= rare, "not enough rare reward");
+   check(it_reward->legend >= legendary, "not enough legendary reward");
+
+   uint64_t precision = math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision());
+
+   uint64_t reward_token = 0;
+   reward_token         += common * precision;
+   reward_token         += uncommon * precision;
+   reward_token         += rare * precision;
+   reward_token         += legendary * precision;
+
+   asset quantity = asset(reward_token, config.get().CORE_TOKEN_SYMBOL);
+
+   action(
+      permission_level {
+         get_self(),
+         "active"_n
+      },
+      config.get().CORE_TOKEN_ACCOUNT,
+      "issuesuper"_n,
+      make_tuple(
+         player_account,
+         quantity,
+         string("sell::reward - issue")
+      )
+   ).send();
+}
+
 void game::on_transfer_nft(
    name              from,
    name              to,
@@ -844,3 +889,12 @@ void game::on_transfer_nft(
 }
 
 uint64_t game::now() { return current_time_point().sec_since_epoch(); }
+
+uint64_t game::math_pow(
+   uint64_t base,
+   uint8_t exp
+) {
+   uint64_t result = base > 0 ? base : 0;
+   for(int8_t i = 1; i < exp; i++) result *= base;
+   return result;
+}

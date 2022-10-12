@@ -180,7 +180,7 @@ void shop::on_receive_token(
    else if(memo.find("buy_energy") == 0 && memo == "buy_energy") {
       check(get_first_receiver() == config.get().CORE_TOKEN_ACCOUNT && quantity.symbol == config.get().CORE_TOKEN_SYMBOL, "this token has not sopported");
 
-      uint32_t amount = quantity.amount / (math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision())) * config.get().price_energy_per_token;
+      uint32_t amount = quantity.amount / math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision()) * config.get().price_energy_per_token;
 
       action(
          permission_level {
@@ -214,7 +214,7 @@ void shop::on_receive_token(
       check(get_first_receiver() == config.get().CORE_TOKEN_ACCOUNT && quantity.symbol == config.get().CORE_TOKEN_SYMBOL, "this token has not sopported");
 
       int64_t tool_id = stoull(memo.substr(16));
-      uint32_t amount = quantity.amount / (math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision())) * config.get().price_energy_per_token;
+      uint32_t amount = quantity.amount / math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision()) * config.get().price_energy_per_token;
 
       action(
          permission_level {

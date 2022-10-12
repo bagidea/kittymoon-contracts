@@ -129,6 +129,14 @@ CONTRACT game : public contract {
          vector<uint8_t>   blocks_index
       );
 
+      ACTION sellreward(
+         name        player_account,
+         uint32_t    common,
+         uint32_t    uncommon,
+         uint32_t    rare,
+         uint32_t    legendary
+      );
+
       [[eosio::on_notify("atomicassets::transfer")]]
       void on_transfer_nft(
          name              from,
@@ -138,6 +146,11 @@ CONTRACT game : public contract {
       );
 
       uint64_t now();
+
+      uint64_t math_pow(
+         uint64_t base,
+         uint8_t exp
+      );
 
    private:
       TABLE config_init {
