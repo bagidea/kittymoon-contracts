@@ -735,13 +735,11 @@ ACTION game::sellreward(
    check(it_reward->rare >= rare, "not enough rare reward");
    check(it_reward->legend >= legendary, "not enough legendary reward");
 
-   uint64_t precision = math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision());
-
    uint64_t reward_token = 0;
-   reward_token         += common * precision;
-   reward_token         += uncommon * precision;
-   reward_token         += rare * precision;
-   reward_token         += legendary * precision;
+   reward_token         += common * gameconfig.get().reward_common.amount;
+   reward_token         += uncommon * gameconfig.get().reward_uncommon.amount;
+   reward_token         += rare * gameconfig.get().reward_rare.amount;
+   reward_token         += legendary * gameconfig.get().reward_legend.amount;
 
    asset quantity = asset(reward_token, config.get().CORE_TOKEN_SYMBOL);
 
@@ -755,7 +753,7 @@ ACTION game::sellreward(
       make_tuple(
          player_account,
          quantity,
-         string("sell::reward - issue")
+         string("sell::rewards - issue")
       )
    ).send();
 }
