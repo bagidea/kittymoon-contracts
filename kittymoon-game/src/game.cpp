@@ -580,7 +580,7 @@ ACTION game::watering(
 
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
-      check(it_land->lands[land_num].blocks[blocks_index[i]].status == "watering", "some blocks is not watering");
+      check(it_land->lands[land_num].blocks[blocks_index[i]].status == "watering", "some blocks is not put seed");
 
       lands.modify(
          it_land,
@@ -659,12 +659,12 @@ ACTION game::harvesting(
 
    uint32_t reward_common   = 0;
    uint32_t reward_uncommon = 0;
-   uint32_t reward_rare   = 0;
+   uint32_t reward_rare     = 0;
    uint32_t reward_legend   = 0;
 
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
-      check(it_land->lands[land_num].blocks[blocks_index[i]].status == "harvesting", "some blocks is not harvesting");
+      check(it_land->lands[land_num].blocks[blocks_index[i]].status == "harvesting", "some blocks is not yet ready to harvest");
       check(now() - it_land->lands[land_num].blocks[blocks_index[i]].current_time >= it_land->lands[land_num].blocks[blocks_index[i]].cooldown_hr, "not harvest, because it not growing");
 
       string rarity = it_land->lands[land_num].blocks[blocks_index[i]].rarity;
