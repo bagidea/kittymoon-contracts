@@ -64,11 +64,11 @@ CONTRACT shop : public contract {
 
    private:
       TABLE config_init {
-         name     CORE_TOKEN_ACCOUNT      = "kittentokens"_n;
-         symbol   CORE_TOKEN_SYMBOL       = symbol("KITTEN", 8);
-         name     ASSETS_COLLECTION_NAME  = "kittymoonnft"_n;
-         name     CORE_GAME_ACCOUNT       = "kittengamepl"_n;
-         uint32_t price_energy_per_token  = 25;
+         name     CORE_TOKEN_ACCOUNT;
+         symbol   CORE_TOKEN_SYMBOL;
+         name     ASSETS_COLLECTION_NAME;
+         name     CORE_GAME_ACCOUNT;
+         uint32_t price_energy_per_token;
       };
 
       typedef singleton<"config"_n, config_init> config_t;
