@@ -108,6 +108,17 @@ ACTION game::signup(
 
    asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
+   bonusrewards.emplace(
+      player_account,
+      [&](auto& s) {
+         s.player_account = player_account;
+         s.common         = new_asset;
+         s.uncommon       = new_asset;
+         s.rare           = new_asset;
+         s.legend         = new_asset;
+      }
+   );
+
    penaliseds.emplace(
       player_account,
       [&](auto& s) {
@@ -202,11 +213,26 @@ ACTION game::repairplayer(
       has_update = true;
    }
 
+   asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
+
+   auto it_bonusreward = bonusrewards.find(player_account.value);
+
+   if(it_bonusreward == bonusrewards.end()) {
+      bonusrewards.emplace(
+         player_account,
+         [&](auto& s) {
+            s.player_account = player_account;
+            s.common         = new_asset;
+            s.uncommon       = new_asset;
+            s.rare           = new_asset;
+            s.legend         = new_asset;
+         }
+      );
+   }
+
    auto it_penalised = penaliseds.find(player_account.value);
 
    if(it_penalised == penaliseds.end()) {
-      asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
-
       penaliseds.emplace(
          player_account,
          [&](auto& s) {
