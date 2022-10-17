@@ -140,11 +140,7 @@ CONTRACT game : public contract {
       );
 
       ACTION sellreward(
-         name        player_account,
-         uint32_t    common,
-         uint32_t    uncommon,
-         uint32_t    rare,
-         uint32_t    legendary
+         name        player_account
       );
 
       [[eosio::on_notify("atomicassets::transfer")]]

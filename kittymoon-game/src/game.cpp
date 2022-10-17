@@ -857,11 +857,7 @@ ACTION game::harvesting(
 }
 
 ACTION game::sellreward(
-   name        player_account,
-   uint32_t    common,
-   uint32_t    uncommon,
-   uint32_t    rare,
-   uint32_t    legendary
+   name        player_account
 ) {
    require_auth(player_account);
 
@@ -871,16 +867,13 @@ ACTION game::sellreward(
    auto it_reward = rewards.find(player_account.value);
    check(it_reward != rewards.end(), "not found rewards from account");
 
-   check(it_reward->common >= common, "not enough common reward");
-   check(it_reward->uncommon >= uncommon, "not enough uncommon reward");
-   check(it_reward->rare >= rare, "not enough rare reward");
-   check(it_reward->legend >= legendary, "not enough legendary reward");
-
    uint64_t reward_token = 0;
-   reward_token         += common * gameconfig.get().reward_common.amount;
-   reward_token         += uncommon * gameconfig.get().reward_uncommon.amount;
-   reward_token         += rare * gameconfig.get().reward_rare.amount;
-   reward_token         += legendary * gameconfig.get().reward_legend.amount;
+   reward_token         += it_reward->common * gameconfig.get().reward_common.amount;
+   reward_token         += it_reward->uncommon * gameconfig.get().reward_uncommon.amount;
+   reward_token         += it_reward->rare * gameconfig.get().reward_rare.amount;
+   reward_token         += it_reward->legend * gameconfig.get().reward_legend.amount;
+
+   check(reward_token > 0, "not enough reward left");
 
    asset quantity = asset(reward_token, config.get().CORE_TOKEN_SYMBOL);
 
@@ -888,10 +881,10 @@ ACTION game::sellreward(
       it_reward,
       player_account,
       [&](auto& s) {
-         s.common    -= common;
-         s.uncommon  -= uncommon;
-         s.rare      -= rare;
-         s.legend    -= legendary;
+         s.common    = 0;
+         s.uncommon  = 0;
+         s.rare      = 0;
+         s.legend    = 0;
       }
    );
 
