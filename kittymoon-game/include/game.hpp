@@ -2,6 +2,7 @@
 #include <eosio/system.hpp>
 
 #include <string>
+#include <cstring>
 #include <vector>
 
 #include <atomicassets-interface.hpp>

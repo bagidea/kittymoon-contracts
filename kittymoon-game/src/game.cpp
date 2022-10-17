@@ -1036,6 +1036,7 @@ void game::on_transfer_nft(
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_TOOLS) {
          string name = get<string>(imdata["name"]);
          string rarity = get<string>(imdata["rarity"]);
+         transform(rarity.begin(), rarity.end(), rarity.begin(), [](unsigned char c) { return tolower(c); });
          uint32_t cooldown_hr = get<uint64_t>(imdata["cooldown_hr"]);
          uint32_t energy = get<uint64_t>(imdata["energy"]);
          uint32_t energy_using = get<uint64_t>(imdata["energy_using"]);
