@@ -824,10 +824,15 @@ ACTION game::harvesting(
    auto it_reward = rewards.find(player_account.value);
    check(it_reward != rewards.end(), "not found rewards from account");
 
-   uint32_t reward_common   = 0;
-   uint32_t reward_uncommon = 0;
-   uint32_t reward_rare     = 0;
-   uint32_t reward_legend   = 0;
+   uint32_t reward_common        = 0;
+   uint32_t reward_uncommon      = 0;
+   uint32_t reward_rare          = 0;
+   uint32_t reward_legend        = 0;
+
+   asset    penalised_common     = asset(0, config.get().CORE_TOKEN_SYMBOL);
+   asset    penalised_uncommon   = asset(0, config.get().CORE_TOKEN_SYMBOL);
+   asset    penalised_rare       = asset(0, config.get().CORE_TOKEN_SYMBOL);
+   asset    penalised_legend     = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
@@ -840,6 +845,33 @@ ACTION game::harvesting(
       else if(rarity == "uncommon")  reward_uncommon++;
       else if(rarity == "rare")      reward_rare++;
       else if(rarity == "legendary") reward_legend++;
+
+      string tool_rarity = it_tool->toolaxes[selected].rarity;
+
+      if(tool_rarity == "Common") {
+         // Penalised calculate
+         if(rarity == "legendary") {
+         }
+         else if(rarity == "rare") {
+         }
+         else if(rarity == "uncommon") {
+         }
+      }
+      else if(tool_rarity == "Uncommon") {
+         // Penalised calculate
+         if(rarity == "legendary") {
+         }
+         else if(rarity == "rare") {
+         }
+      }
+      else if(tool_rarity == "Rare") {
+         // Penalised calculate
+         if(rarity == "legendary") {
+         }
+      }
+      else if(tool_rarity == "Legendary") {
+         // Bonus calculate
+      }
 
       lands.modify(
          it_land,
