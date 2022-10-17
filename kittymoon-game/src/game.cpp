@@ -33,18 +33,30 @@ ACTION game::setgameconfig(
    asset       reward_uncommon,
    asset       reward_rare,
    asset       reward_legend,
-   uint32_t    cooldown_growing
+   uint32_t    cooldown_growing,
+   uint32_t    penalised_rare_legendary,
+   uint32_t    penalised_uncommon_legendary,
+   uint32_t    penalised_uncommon_rare,
+   uint32_t    penalised_common_legendary,
+   uint32_t    penalised_common_rare,
+   uint32_t    penalised_common_uncommon
 ) {
    require_auth(get_self());
 
    gameconfig.set(
       {
-         .first_energy     = first_energy,
-         .reward_common    = reward_common,
-         .reward_uncommon  = reward_uncommon,
-         .reward_rare      = reward_rare,
-         .reward_legend    = reward_legend,
-         .cooldown_growing = cooldown_growing
+         .first_energy                 = first_energy,
+         .reward_common                = reward_common,
+         .reward_uncommon              = reward_uncommon,
+         .reward_rare                  = reward_rare,
+         .reward_legend                = reward_legend,
+         .cooldown_growing             = cooldown_growing,
+         .penalised_rare_legendary     = penalised_rare_legendary,
+         .penalised_uncommon_legendary = penalised_uncommon_legendary,
+         .penalised_uncommon_rare      = penalised_uncommon_rare,
+         .penalised_common_legendary   = penalised_common_legendary,
+         .penalised_common_rare        = penalised_common_rare,
+         .penalised_common_uncommon    = penalised_common_uncommon
       },
       get_self()
    );

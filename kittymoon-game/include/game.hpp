@@ -70,7 +70,13 @@ CONTRACT game : public contract {
          asset       reward_uncommon,
          asset       reward_rare,
          asset       reward_legend,
-         uint32_t    cooldown_growing
+         uint32_t    cooldown_growing,
+         uint32_t    penalised_rare_legendary,
+         uint32_t    penalised_uncommon_legendary,
+         uint32_t    penalised_uncommon_rare,
+         uint32_t    penalised_common_legendary,
+         uint32_t    penalised_common_rare,
+         uint32_t    penalised_common_uncommon
       );
 
       ACTION signup(
@@ -174,6 +180,12 @@ CONTRACT game : public contract {
          asset       reward_rare;
          asset       reward_legend;
          uint32_t    cooldown_growing;
+         uint32_t    penalised_rare_legendary;
+         uint32_t    penalised_uncommon_legendary;
+         uint32_t    penalised_uncommon_rare;
+         uint32_t    penalised_common_legendary;
+         uint32_t    penalised_common_rare;
+         uint32_t    penalised_common_uncommon;
       };
 
       typedef singleton<"gameconfig"_n, game_config> gameconfig_t;
@@ -215,6 +227,18 @@ CONTRACT game : public contract {
 
       typedef multi_index<"rewards"_n, reward> reward_t;
 
+      TABLE extra_reward {
+         name        player_account;
+         int32_t     common;
+         int32_t     uncommon;
+         int32_t     rare;
+         int32_t     legend;
+
+         uint64_t primary_key() const { return player_account.value; }
+      };
+
+      typedef multi_index<"extrarewards"_n, extra_reward> extrareward_t;
+
       TABLE tool {
          name           player_account;
          vector<TOOL>   toolhoes;
@@ -240,6 +264,7 @@ CONTRACT game : public contract {
       player_t players = player_t(get_self(), get_self().value);
       seed_t seeds = seed_t(get_self(), get_self().value);
       reward_t rewards = reward_t(get_self(), get_self().value);
+      extrareward_t extrarewards = extrareward_t(get_self(), get_self().value);
       tool_t tools = tool_t(get_self(), get_self().value);
       land_t lands = land_t(get_self(), get_self().value);
 };
