@@ -6,6 +6,7 @@
 #include <eosio/singleton.hpp>
 
 #include <string>
+#include <vector>
 
 namespace eosiosystem {
    class system_contract;
@@ -14,12 +15,13 @@ namespace eosiosystem {
 namespace eosio
 {
    using std::string;
+   using std::vector;
 
    CONTRACT token : public contract {
       public:
          using contract::contract;
 
-         ACTION setsuper(name super_account);
+         ACTION setsuper(vector<name> super_accounts);
 
          ACTION create(
             const name&  issuer,
@@ -33,6 +35,7 @@ namespace eosio
          );
 
          ACTION issuesuper(
+            const name&   super_account,
             const name&   to,
             const asset&  quantity,
             const string& memo
@@ -103,7 +106,7 @@ namespace eosio
          typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
          TABLE super_stats {
-            name super_account;
+            vector<name> super_accounts;
          };
 
          typedef eosio::singleton<"superstats"_n, super_stats> super_t;

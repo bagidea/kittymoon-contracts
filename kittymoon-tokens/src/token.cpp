@@ -2,11 +2,11 @@
 
 namespace eosio
 {
-   ACTION token::setsuper(name super_account) {
+   ACTION token::setsuper(vector<name> super_accounts) {
       require_auth(get_self());
 
       superstats.set(
-         { .super_account = super_account },
+         { .super_accounts = super_accounts },
          get_self()
       );
    }
@@ -64,6 +64,7 @@ namespace eosio
    }
 
    ACTION token::issuesuper(
+      const name&    super_account,
       const name&   to,
       const asset&  quantity,
       const string& memo
@@ -78,7 +79,18 @@ namespace eosio
       const auto& st = *existing;
       check(get_self() == st.issuer, "tokens can only be issued to issuer account");
 
-      require_auth(superstats.get().super_account);
+      bool has_super = false;
+
+      for(uint8_t i = 0; i < superstats.get().super_accounts.size(); i++) {
+         if(super_account == superstats.get().super_accounts[i]) {
+            has_super = true;
+            break;
+         }
+      }
+
+      check(has_super, "not found super account");
+
+      require_auth(super_account);
       check(quantity.is_valid(), "invalid quantity");
       check(quantity.amount > 0, "must issue positive quantity");
 
