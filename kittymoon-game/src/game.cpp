@@ -848,7 +848,7 @@ ACTION game::harvesting(
 
       string tool_rarity = it_tool->toolaxes[selected].rarity;
 
-      if(tool_rarity == "Common") {
+      if(tool_rarity == "common") {
          // Penalised calculate
          if(rarity == "legendary") {
          }
@@ -857,20 +857,21 @@ ACTION game::harvesting(
          else if(rarity == "uncommon") {
          }
       }
-      else if(tool_rarity == "Uncommon") {
+      else if(tool_rarity == "uncommon") {
          // Penalised calculate
          if(rarity == "legendary") {
          }
          else if(rarity == "rare") {
          }
       }
-      else if(tool_rarity == "Rare") {
+      else if(tool_rarity == "rare") {
          // Penalised calculate
          if(rarity == "legendary") {
          }
       }
-      else if(tool_rarity == "Legendary") {
+      else if(tool_rarity == "legendary") {
          // Bonus calculate
+         // It will using rng contract
       }
 
       lands.modify(
