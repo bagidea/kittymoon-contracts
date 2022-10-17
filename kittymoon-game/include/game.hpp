@@ -84,6 +84,10 @@ CONTRACT game : public contract {
          string   player_name
       );
 
+      ACTION repairplayer(
+         name     player_account
+      );
+
       ACTION modifyname(
          name     player_account,
          string   player_name

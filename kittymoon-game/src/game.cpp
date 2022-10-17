@@ -106,6 +106,17 @@ ACTION game::signup(
       }
    );
 
+   extrarewards.emplace(
+      player_account,
+      [&](auto& s) {
+         s.player_account = player_account;
+         s.common         = 0;
+         s.uncommon       = 0;
+         s.rare           = 0;
+         s.legend         = 0;
+      }
+   );
+
    tools.emplace(
       get_self(),
       [&](auto& s) {
@@ -143,6 +154,120 @@ ACTION game::signup(
          s.lands.push_back(land_default);
       }
    );
+}
+
+ACTION game::repairplayer(
+   name     player_account
+) {
+   require_auth(player_account);
+
+   auto it_player = players.find(player_account.value);
+   check(it_player != players.end(), "not found account");
+
+   bool has_update = false;
+
+   auto it_seed = seeds.find(player_account.value);
+
+   if(it_seed == seeds.end()) {
+      seeds.emplace(
+         player_account,
+         [&](auto& s) {
+            s.player_account = player_account;
+            s.common         = 0;
+            s.uncommon       = 0;
+            s.rare           = 0;
+            s.legend         = 0;
+         }
+      );
+
+      has_update = true;
+   }
+
+   auto it_reward = rewards.find(player_account.value);
+
+   if(it_reward == rewards.end()) {
+      rewards.emplace(
+         player_account,
+         [&](auto& s) {
+            s.player_account = player_account;
+            s.common         = 0;
+            s.uncommon       = 0;
+            s.rare           = 0;
+            s.legend         = 0;
+         }
+      );
+
+      has_update = true;
+   }
+
+   auto it_extrareward = extrarewards.find(player_account.value);
+
+   if(it_extrareward == extrarewards.end()) {
+      extrarewards.emplace(
+         player_account,
+         [&](auto& s) {
+            s.player_account = player_account;
+            s.common         = 0;
+            s.uncommon       = 0;
+            s.rare           = 0;
+            s.legend         = 0;
+         }
+      );
+
+      has_update = true;
+   }
+
+   auto it_tool = tools.find(player_account.value);
+
+   if(it_tool == tools.end()) {
+      tools.emplace(
+         get_self(),
+         [&](auto& s) {
+            s.player_account = player_account;
+         }
+      );
+
+      has_update = true;
+   }
+
+   auto it_land = lands.find(player_account.value);
+
+   if(it_land == lands.end()) {
+      lands.emplace(
+         get_self(),
+         [&](auto& s) {
+            s.player_account = player_account;
+
+            LAND land_default;
+            land_default.asset_id         = 0;
+            land_default.rarity           = "default";
+            land_default.cooldown_hr      = 0;
+            land_default.energy           = 0;
+            land_default.max_energy       = 0;
+            land_default.energy_using     = 0;
+            land_default.blocks_count     = 4;
+            land_default.mining_bonus     = "";
+            land_default.minting_bonus    = "";
+            land_default.current_time     = 0;
+
+            for(uint8_t i = 0; i < 4; i++) {
+               BLOCK new_block;
+               new_block.status        = "ready";
+               new_block.rarity        = "";
+               new_block.cooldown_hr   = 0;
+               new_block.current_time  = 0;
+
+               land_default.blocks.push_back(new_block);
+            }
+
+            s.lands.push_back(land_default);
+         }
+      );
+
+      has_update = true;
+   }
+
+   check(has_update, "no update because this account is the latest version");
 }
 
 ACTION game::modifyname(
