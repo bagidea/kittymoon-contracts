@@ -227,6 +227,18 @@ CONTRACT game : public contract {
 
       typedef multi_index<"rewards"_n, reward> reward_t;
 
+      TABLE bonus_reward {
+         name        player_account;
+         asset       common;
+         asset       uncommon;
+         asset       rare;
+         asset       legend;
+
+         uint64_t primary_key() const { return player_account.value; }
+      };
+
+      typedef multi_index<"bonusrewards"_n, bonus_reward> bonusreward_t;
+
       TABLE penalised {
          name        player_account;
          asset       common;
@@ -264,6 +276,7 @@ CONTRACT game : public contract {
       player_t players = player_t(get_self(), get_self().value);
       seed_t seeds = seed_t(get_self(), get_self().value);
       reward_t rewards = reward_t(get_self(), get_self().value);
+      bonusreward_t bonusrewards = bonusreward_t(get_self(), get_self().value);
       penalised_t penaliseds = penalised_t(get_self(), get_self().value);
       tool_t tools = tool_t(get_self(), get_self().value);
       land_t lands = land_t(get_self(), get_self().value);
