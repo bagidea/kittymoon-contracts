@@ -108,7 +108,7 @@ ACTION game::signup(
 
    asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
-   extrarewards.emplace(
+   penaliseds.emplace(
       player_account,
       [&](auto& s) {
          s.player_account = player_account;
@@ -202,12 +202,12 @@ ACTION game::repairplayer(
       has_update = true;
    }
 
-   auto it_extrareward = extrarewards.find(player_account.value);
+   auto it_penalised = penaliseds.find(player_account.value);
 
-   if(it_extrareward == extrarewards.end()) {
+   if(it_penalised == penaliseds.end()) {
       asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
-      extrarewards.emplace(
+      penaliseds.emplace(
          player_account,
          [&](auto& s) {
             s.player_account = player_account;
@@ -868,10 +868,10 @@ ACTION game::sellreward(
    check(it_reward != rewards.end(), "not found rewards from account");
 
    uint64_t reward_token = 0;
-   reward_token         += it_reward->common * gameconfig.get().reward_common.amount;
-   reward_token         += it_reward->uncommon * gameconfig.get().reward_uncommon.amount;
-   reward_token         += it_reward->rare * gameconfig.get().reward_rare.amount;
-   reward_token         += it_reward->legend * gameconfig.get().reward_legend.amount;
+   reward_token += it_reward->common * gameconfig.get().reward_common.amount;
+   reward_token += it_reward->uncommon * gameconfig.get().reward_uncommon.amount;
+   reward_token += it_reward->rare * gameconfig.get().reward_rare.amount;
+   reward_token += it_reward->legend * gameconfig.get().reward_legend.amount;
 
    check(reward_token > 0, "not enough reward left");
 
@@ -881,10 +881,10 @@ ACTION game::sellreward(
       it_reward,
       player_account,
       [&](auto& s) {
-         s.common    = 0;
-         s.uncommon  = 0;
-         s.rare      = 0;
-         s.legend    = 0;
+         s.common   = 0;
+         s.uncommon = 0;
+         s.rare     = 0;
+         s.legend   = 0;
       }
    );
 
