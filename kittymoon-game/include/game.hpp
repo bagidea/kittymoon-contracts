@@ -233,10 +233,10 @@ CONTRACT game : public contract {
 
       TABLE extra_reward {
          name        player_account;
-         int32_t     common;
-         int32_t     uncommon;
-         int32_t     rare;
-         int32_t     legend;
+         asset       common;
+         asset       uncommon;
+         asset       rare;
+         asset       legend;
 
          uint64_t primary_key() const { return player_account.value; }
       };

@@ -106,14 +106,16 @@ ACTION game::signup(
       }
    );
 
+   asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
+
    extrarewards.emplace(
       player_account,
       [&](auto& s) {
          s.player_account = player_account;
-         s.common         = 0;
-         s.uncommon       = 0;
-         s.rare           = 0;
-         s.legend         = 0;
+         s.common         = new_asset;
+         s.uncommon       = new_asset;
+         s.rare           = new_asset;
+         s.legend         = new_asset;
       }
    );
 
@@ -203,14 +205,16 @@ ACTION game::repairplayer(
    auto it_extrareward = extrarewards.find(player_account.value);
 
    if(it_extrareward == extrarewards.end()) {
+      asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
+
       extrarewards.emplace(
          player_account,
          [&](auto& s) {
             s.player_account = player_account;
-            s.common         = 0;
-            s.uncommon       = 0;
-            s.rare           = 0;
-            s.legend         = 0;
+            s.common         = new_asset;
+            s.uncommon       = new_asset;
+            s.rare           = new_asset;
+            s.legend         = new_asset;
          }
       );
 
