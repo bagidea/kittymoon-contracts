@@ -825,7 +825,7 @@ ACTION game::harvesting(
    check(it_reward != rewards.end(), "not found rewards from account");
 
    auto it_penalised = penaliseds.find(player_account.value);
-   check(it_penalised != penaliseds.end(), "not found penalised from account");
+   check(it_penalised != penaliseds.end(), "not found penaliseds from account");
 
    uint32_t reward_common        = 0;
    uint32_t reward_uncommon      = 0;
@@ -943,11 +943,14 @@ ACTION game::sellreward(
    auto it_reward = rewards.find(player_account.value);
    check(it_reward != rewards.end(), "not found rewards from account");
 
+   auto it_penalised = penaliseds.find(player_account.value);
+   check(it_penalised != penaliseds.end(), "not found penaliseds from account");
+
    uint64_t reward_token = 0;
-   reward_token += it_reward->common * gameconfig.get().reward_common.amount;
-   reward_token += it_reward->uncommon * gameconfig.get().reward_uncommon.amount;
-   reward_token += it_reward->rare * gameconfig.get().reward_rare.amount;
-   reward_token += it_reward->legend * gameconfig.get().reward_legend.amount;
+   reward_token += (it_reward->common * gameconfig.get().reward_common.amount) - it_penalised->common.amount;
+   reward_token += (it_reward->uncommon * gameconfig.get().reward_uncommon.amount) - it_penalised->uncommon.amount;
+   reward_token += (it_reward->rare * gameconfig.get().reward_rare.amount) - it_penalised->rare.amount;
+   reward_token += (it_reward->legend * gameconfig.get().reward_legend.amount) - it_penalised->legend.amount;
 
    check(reward_token > 0, "not enough reward left");
 
@@ -961,6 +964,17 @@ ACTION game::sellreward(
          s.uncommon = 0;
          s.rare     = 0;
          s.legend   = 0;
+      }
+   );
+
+   penaliseds.modify(
+      it_penalised,
+      player_account,
+      [&](auto& s) {
+         s.common.amount   = 0;
+         s.uncommon.amount = 0;
+         s.rare.amount     = 0;
+         s.legend.amount   = 0;
       }
    );
 
