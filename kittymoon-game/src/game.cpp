@@ -824,6 +824,9 @@ ACTION game::harvesting(
    auto it_reward = rewards.find(player_account.value);
    check(it_reward != rewards.end(), "not found rewards from account");
 
+   auto it_penalised = penaliseds.find(player_account.value);
+   check(it_penalised != penaliseds.end(), "not found penalised from account");
+
    uint32_t reward_common        = 0;
    uint32_t reward_uncommon      = 0;
    uint32_t reward_rare          = 0;
@@ -849,24 +852,27 @@ ACTION game::harvesting(
       string tool_rarity = it_tool->toolaxes[selected].rarity;
 
       if(tool_rarity == "common") {
-         // Penalised calculate
          if(rarity == "legendary") {
+            penalised_legend.amount += gameconfig.get().reward_legend.amount * (gameconfig.get().penalised_common_legendary / 100.0);
          }
          else if(rarity == "rare") {
+            penalised_rare.amount += gameconfig.get().reward_rare.amount * (gameconfig.get().penalised_common_rare / 100.0);
          }
          else if(rarity == "uncommon") {
+            penalised_uncommon.amount += gameconfig.get().reward_uncommon.amount * (gameconfig.get().penalised_common_uncommon / 100.0);
          }
       }
       else if(tool_rarity == "uncommon") {
-         // Penalised calculate
          if(rarity == "legendary") {
+            penalised_legend.amount += gameconfig.get().reward_legend.amount * (gameconfig.get().penalised_uncommon_legendary / 100.0);
          }
          else if(rarity == "rare") {
+            penalised_rare.amount += gameconfig.get().reward_rare.amount * (gameconfig.get().penalised_uncommon_rare / 100.0);
          }
       }
       else if(tool_rarity == "rare") {
-         // Penalised calculate
          if(rarity == "legendary") {
+            penalised_legend.amount += gameconfig.get().reward_legend.amount * (gameconfig.get().penalised_rare_legendary / 100.0);
          }
       }
       else if(tool_rarity == "legendary") {
@@ -911,6 +917,17 @@ ACTION game::harvesting(
          s.uncommon += reward_uncommon;
          s.rare     += reward_rare;
          s.legend   += reward_legend;
+      }
+   );
+
+   penaliseds.modify(
+      it_penalised,
+      player_account,
+      [&](auto& s) {
+         s.common.amount   += penalised_common.amount;
+         s.uncommon.amount += penalised_uncommon.amount;
+         s.rare.amount     += penalised_rare.amount;
+         s.legend.amount   += penalised_legend.amount;
       }
    );
 }
