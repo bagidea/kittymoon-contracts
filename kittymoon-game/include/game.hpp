@@ -147,8 +147,7 @@ CONTRACT game : public contract {
 
       ACTION receiverand(
          uint64_t       assoc_id,
-         uint64_t       signing_value,
-         const name&    caller
+         checksum256&   random_value
       );
 
       [[eosio::on_notify("atomicassets::transfer")]]

@@ -1056,10 +1056,11 @@ ACTION game::sellreward(
 
 ACTION game::receiverand(
    uint64_t       assoc_id,
-   uint64_t       signing_value,
-   const name&    caller
+   checksum256&   random_value
 ) {
    require_auth(WAX_RNG_ACCOUNT);
+
+   auto byte_array = random_value.extract_as_byte_array();
 }
 
 void game::on_transfer_nft(
