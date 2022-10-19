@@ -1059,7 +1059,7 @@ ACTION game::receiverand(
    uint64_t       signing_value,
    const name&    caller
 ) {
-   require_auth(WAX_RNG_ORACLE_ACCOUNT);
+   require_auth(WAX_RNG_ACCOUNT);
 }
 
 void game::on_transfer_nft(

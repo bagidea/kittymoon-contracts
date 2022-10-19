@@ -15,7 +15,6 @@ using namespace atomicdata;
 
 static constexpr name ASSETS_ACCOUNT         = "atomicassets"_n;
 static constexpr name WAX_RNG_ACCOUNT        = "orng.wax"_n;
-static constexpr name WAX_RNG_ORACLE_ACCOUNT = "oracle.wax"_n;
 
 CONTRACT game : public contract {
    public:
