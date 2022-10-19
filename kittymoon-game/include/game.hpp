@@ -146,7 +146,7 @@ CONTRACT game : public contract {
          name        player_account
       );
 
-      ACTION requestrand(
+      ACTION receiverand(
          uint64_t       assoc_id,
          uint64_t       signing_value,
          const name&    caller

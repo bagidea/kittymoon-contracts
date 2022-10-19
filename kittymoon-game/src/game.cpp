@@ -913,6 +913,31 @@ ACTION game::harvesting(
          
             auto it_randnumber = randnumbers.find(player_account.value);
             check(it_randnumber != randnumbers.end(), "not found random number table from account");
+
+            randnumbers.modify(
+               it_randnumber,
+               player_account,
+               [&](auto& s) {
+                  s.min_number  = min;
+                  s.max_number  = max;
+                  s.status      = "harvest_bonus";
+                  s.value       = rarity;
+               }
+            );
+
+            action(
+               permission_level {
+                  get_self(),
+                  "active"_n
+               },
+               WAX_RNG_ACCOUNT,
+               "requestrand"_n,
+               make_tuple(
+                  player_account.value,
+                  now(),
+                  get_self()
+               )
+            ).send();
          }
       }
 
@@ -1029,7 +1054,7 @@ ACTION game::sellreward(
    ).send();
 }
 
-ACTION game::requestrand(
+ACTION game::receiverand(
    uint64_t       assoc_id,
    uint64_t       signing_value,
    const name&    caller
