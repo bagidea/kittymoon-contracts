@@ -916,7 +916,7 @@ ACTION game::harvesting(
 
             randnumbers.modify(
                it_randnumber,
-               player_account,
+               get_self(),
                [&](auto& s) {
                   s.min_number  = min;
                   s.max_number  = max;
@@ -1007,11 +1007,14 @@ ACTION game::sellreward(
    auto it_penalised = penaliseds.find(player_account.value);
    check(it_penalised != penaliseds.end(), "not found penaliseds from account");
 
+   auto it_bonusreward = bonusrewards.find(player_account.value);
+   check(it_bonusreward != bonusrewards.end(), "not found bonus rewards from account");
+
    uint64_t reward_token = 0;
-   reward_token += (it_reward->common * gameconfig.get().reward_common.amount) - it_penalised->common.amount;
-   reward_token += (it_reward->uncommon * gameconfig.get().reward_uncommon.amount) - it_penalised->uncommon.amount;
-   reward_token += (it_reward->rare * gameconfig.get().reward_rare.amount) - it_penalised->rare.amount;
-   reward_token += (it_reward->legend * gameconfig.get().reward_legend.amount) - it_penalised->legend.amount;
+   reward_token += (it_reward->common * gameconfig.get().reward_common.amount) + it_bonusreward->common.amount - it_penalised->common.amount;
+   reward_token += (it_reward->uncommon * gameconfig.get().reward_uncommon.amount) + it_bonusreward->uncommon.amount - it_penalised->uncommon.amount;
+   reward_token += (it_reward->rare * gameconfig.get().reward_rare.amount) + it_bonusreward->rare.amount - it_penalised->rare.amount;
+   reward_token += (it_reward->legend * gameconfig.get().reward_legend.amount) + it_bonusreward->legend.amount - it_penalised->legend.amount;
 
    check(reward_token > 0, "not enough reward left");
 
@@ -1030,6 +1033,17 @@ ACTION game::sellreward(
 
    penaliseds.modify(
       it_penalised,
+      player_account,
+      [&](auto& s) {
+         s.common.amount   = 0;
+         s.uncommon.amount = 0;
+         s.rare.amount     = 0;
+         s.legend.amount   = 0;
+      }
+   );
+
+   bonusrewards.modify(
+      it_bonusreward,
       player_account,
       [&](auto& s) {
          s.common.amount   = 0;
@@ -1061,6 +1075,47 @@ ACTION game::receiverand(
    require_auth(WAX_RNG_ACCOUNT);
 
    auto byte_array = random_value.extract_as_byte_array();
+   uint64_t random_int = 0;
+
+   for(int i = 0; i < 8; i++) {
+      random_int <<= 8;
+      random_int |= (uint64_t)byte_array[i];
+   }
+
+   auto it_randnumber = randnumbers.find(assoc_id);
+   check(it_randnumber != randnumbers.end(), "not found account from assoc_id");
+
+   uint64_t max_value = it_randnumber->max_number - it_randnumber->min_number;
+   uint64_t result = (random_int % max_value) + it_randnumber->min_number;
+
+   if(it_randnumber->status == "harvest_bonus") {
+      auto it_bonusreward = bonusrewards.find(assoc_id);
+      check(it_bonusreward != bonusrewards.end(), "not found bonus rewards from account");
+
+      bonusrewards.modify(
+         it_bonusreward,
+         it_randnumber->player_account,
+         [&](auto& s) {
+            s.common.amount += it_randnumber->value == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
+            s.uncommon.amount += it_randnumber->value == "uncommon" ? (gameconfig.get().reward_uncommon.amount * (result / 100.0)) : 0;
+            s.rare.amount += it_randnumber->value == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
+            s.legend.amount += it_randnumber->value == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
+         }
+      );
+   } else {
+      check(false, "incorrect status not match");
+   }
+
+   randnumbers.modify(
+      it_randnumber,
+      get_self(),
+      [&](auto& s) {
+         s.min_number = 0;
+         s.max_number = 0;
+         s.status = "";
+         s.value = "";
+      }
+   );
 }
 
 void game::on_transfer_nft(
