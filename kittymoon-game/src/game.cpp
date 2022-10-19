@@ -137,6 +137,17 @@ ACTION game::signup(
       }
    );
 
+   randnumbers.emplace(
+      get_self(),
+      [&](auto& s) {
+         s.player_account = player_account;
+         s.min_number     = 0;
+         s.max_number     = 0;
+         s.status         = "";
+         s.value          = "";
+      }
+   );
+
    lands.emplace(
       get_self(),
       [&](auto& s) {
@@ -258,6 +269,21 @@ ACTION game::repairplayer(
       );
 
       has_update = true;
+   }
+
+   auto it_randnumber = randnumbers.find(player_account.value);
+
+   if(it_randnumber == randnumbers.end()) {
+      randnumbers.emplace(
+         get_self(),
+         [&](auto& s) {
+            s.player_account = player_account;
+            s.min_number     = 0;
+            s.max_number     = 0;
+            s.status         = "";
+            s.value          = "";
+         }
+      );
    }
 
    auto it_land = lands.find(player_account.value);
@@ -850,6 +876,7 @@ ACTION game::harvesting(
       else if(rarity == "legendary") reward_legend++;
 
       string tool_rarity = it_tool->toolaxes[selected].rarity;
+      string bonus = it_tool->toolaxes[selected].mining_bonus;
 
       if(tool_rarity == "common") {
          if(rarity == "legendary") {
@@ -876,8 +903,17 @@ ACTION game::harvesting(
          }
       }
       else if(tool_rarity == "legendary") {
-         // Bonus calculate
-         // It will using rng contract
+         if(bonus != "0") {
+            char* bonus_c = new char[bonus.length() + 1];
+            strcpy(bonus_c, bonus.c_str());
+            char* sp = strtok(bonus_c, "-");
+
+            uint64_t min = stoll(sp);
+            uint64_t max = stoll(strtok(NULL, "%"));
+         
+            auto it_randnumber = randnumbers.find(player_account.value);
+            check(it_randnumber != randnumbers.end(), "not found random number table from account");
+         }
       }
 
       lands.modify(
