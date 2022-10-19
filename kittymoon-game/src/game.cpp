@@ -993,6 +993,14 @@ ACTION game::sellreward(
    ).send();
 }
 
+ACTION game::requestrand(
+   uint64_t       assoc_id,
+   uint64_t       signing_value,
+   const name&    caller
+) {
+   require_auth(WAX_RNG_ORACLE_ACCOUNT);
+}
+
 void game::on_transfer_nft(
    name              from,
    name              to,

@@ -13,7 +13,9 @@ using namespace std;
 using namespace atomicassets;
 using namespace atomicdata;
 
-static constexpr name ASSETS_ACCOUNT = "atomicassets"_n;
+static constexpr name ASSETS_ACCOUNT         = "atomicassets"_n;
+static constexpr name WAX_RNG_ACCOUNT        = "orng.wax"_n;
+static constexpr name WAX_RNG_ORACLE_ACCOUNT = "oracle.wax"_n;
 
 CONTRACT game : public contract {
    public:
@@ -142,6 +144,12 @@ CONTRACT game : public contract {
 
       ACTION sellreward(
          name        player_account
+      );
+
+      ACTION requestrand(
+         uint64_t       assoc_id,
+         uint64_t       signing_value,
+         const name&    caller
       );
 
       [[eosio::on_notify("atomicassets::transfer")]]
