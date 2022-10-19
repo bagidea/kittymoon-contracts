@@ -271,6 +271,18 @@ CONTRACT game : public contract {
 
       typedef multi_index<"tools"_n, tool> tool_t;
 
+      TABLE randnumber {
+         name           player_account;
+         uint64_t       min_number;
+         uint64_t       max_number;
+         string         status;
+         string         value;
+
+         uint64_t primary_key() const { return player_account.value; }
+      };
+
+      typedef multi_index<"randnumbers"_n, randnumber> randnumber_t;
+
       TABLE land {
          name           player_account;
          vector<LAND>   lands;
@@ -288,5 +300,6 @@ CONTRACT game : public contract {
       bonusreward_t bonusrewards = bonusreward_t(get_self(), get_self().value);
       penalised_t penaliseds = penalised_t(get_self(), get_self().value);
       tool_t tools = tool_t(get_self(), get_self().value);
+      randnumber_t randnumbers = randnumber_t(get_self(), get_self().value);
       land_t lands = land_t(get_self(), get_self().value);
 };
