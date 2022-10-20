@@ -865,6 +865,8 @@ ACTION game::harvesting(
    asset    penalised_rare       = new_asset;
    asset    penalised_legend     = new_asset;
 
+   bool is_bonus = false;
+
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
       check(it_land->lands[land_num].blocks[blocks_index[i]].status == "harvesting", "some blocks is not yet ready to harvest");
@@ -905,41 +907,39 @@ ACTION game::harvesting(
          }
       }
       else if(tool_rarity == "legendary") {
-         if(bonus != "0") {
-            char* bonus_c = new char[bonus.length() + 1];
-            strcpy(bonus_c, bonus.c_str());
-            char* sp = strtok(bonus_c, "-");
-
-            uint64_t min = stoll(sp);
-            uint64_t max = stoll(strtok(NULL, "%"));
-         
+         if(bonus != "0") { 
             auto it_randnumber = randnumbers.find(player_account.value);
             check(it_randnumber != randnumbers.end(), "not found random number table from account");
 
-            randnumbers.modify(
-               it_randnumber,
-               get_self(),
-               [&](auto& s) {
-                  s.min_number  = min;
-                  s.max_number  = max;
-                  s.status      = "harvest_bonus";
-                  s.value       = rarity;
-               }
-            );
+            if(!is_bonus) {
+               char* bonus_c = new char[bonus.length() + 1];
+               strcpy(bonus_c, bonus.c_str());
+               char* sp = strtok(bonus_c, "-");
 
-            action(
-               permission_level {
+               uint64_t min = stoll(sp);
+               uint64_t max = stoll(strtok(NULL, "%"));
+
+               randnumbers.modify(
+                  it_randnumber,
                   get_self(),
-                  "active"_n
-               },
-               WAX_RNG_ACCOUNT,
-               "requestrand"_n,
-               make_tuple(
-                  player_account.value,
-                  now() + i,
-                  get_self()
-               )
-            ).send();
+                  [&](auto& s) {
+                     s.min_number  = min;
+                     s.max_number  = max;
+                     s.status      = "harvest_bonus";
+                     s.value       = rarity;
+                  }
+               );
+
+               is_bonus = true;
+            } else {
+               randnumbers.modify(
+                  it_randnumber,
+                  get_self(),
+                  [&](auto& s) {
+                     s.value       += ":"+rarity;
+                  }
+               );
+            }
          }
       }
 
@@ -953,6 +953,22 @@ ACTION game::harvesting(
             s.lands[land_num].blocks[blocks_index[i]].current_time = 0;
          }
       );
+   }
+
+   if(is_bonus) {
+      action(
+         permission_level {
+            get_self(),
+            "active"_n
+         },
+         WAX_RNG_ACCOUNT,
+         "requestrand"_n,
+         make_tuple(
+            player_account.value,
+            now(),
+            get_self()
+         )
+      ).send();
    }
 
    players.modify(
@@ -1097,16 +1113,24 @@ ACTION game::receiverand(
       auto it_bonusreward = bonusrewards.find(assoc_id);
       check(it_bonusreward != bonusrewards.end(), "not found bonus rewards from account");
 
-      bonusrewards.modify(
-         it_bonusreward,
-         it_randnumber->player_account,
-         [&](auto& s) {
-            s.common.amount += it_randnumber->value == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
-            s.uncommon.amount += it_randnumber->value == "uncommon" ? (gameconfig.get().reward_uncommon.amount * (result / 100.0)) : 0;
-            s.rare.amount += it_randnumber->value == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
-            s.legend.amount += it_randnumber->value == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
-         }
-      );
+      char* bonus_c = new char[it_randnumber->value.length() + 1];
+      strcpy(bonus_c, it_randnumber->value.c_str());
+      char* sp = strtok(bonus_c, ":");
+
+      while(sp != NULL) {
+         bonusrewards.modify(
+            it_bonusreward,
+            it_randnumber->player_account,
+            [&](auto& s) {
+               s.common.amount += sp == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
+               s.uncommon.amount += sp == "uncommon" ? (gameconfig.get().reward_uncommon.amount * (result / 100.0)) : 0;
+               s.rare.amount += sp == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
+               s.legend.amount += sp == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
+            }
+         );
+
+         sp = strtok(NULL, ":");
+      }
    } else {
       check(false, "incorrect status not match");
    }
