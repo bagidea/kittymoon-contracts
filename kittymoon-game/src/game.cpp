@@ -148,6 +148,17 @@ ACTION game::signup(
       }
    );
 
+   HOUSE house;
+   house.asset_id             = 0;
+   house.rarity               = "";
+   house.holding_tools        = 0;
+   house.cooldown_hr          = 0;
+   house.energy               = 0;
+   house.energy_using         = 0;
+   house.coolingdown_bonus    = "";
+   house.minting_bonus        = "";
+   house.current_time         = 0;
+
    lands.emplace(
       get_self(),
       [&](auto& s) {
@@ -158,9 +169,10 @@ ACTION game::signup(
          land_default.rarity           = "default";
          land_default.cooldown_hr      = 0;
          land_default.energy           = 0;
-         land_default.max_energy       = 0;
          land_default.energy_using     = 0;
          land_default.blocks_count     = 4;
+         land_default.house            = house;
+         land_default.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
          land_default.mining_bonus     = "";
          land_default.minting_bonus    = "";
          land_default.current_time     = 0;
@@ -289,6 +301,17 @@ ACTION game::repairplayer(
    auto it_land = lands.find(player_account.value);
 
    if(it_land == lands.end()) {
+      HOUSE house;
+      house.asset_id             = 0;
+      house.rarity               = "";
+      house.holding_tools        = 0;
+      house.cooldown_hr          = 0;
+      house.energy               = 0;
+      house.energy_using         = 0;
+      house.coolingdown_bonus    = "";
+      house.minting_bonus        = "";
+      house.current_time         = 0;
+
       lands.emplace(
          get_self(),
          [&](auto& s) {
@@ -299,9 +322,10 @@ ACTION game::repairplayer(
             land_default.rarity           = "default";
             land_default.cooldown_hr      = 0;
             land_default.energy           = 0;
-            land_default.max_energy       = 0;
             land_default.energy_using     = 0;
             land_default.blocks_count     = 4;
+            land_default.house            = house;
+            land_default.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
             land_default.mining_bonus     = "";
             land_default.minting_bonus    = "";
             land_default.current_time     = 0;

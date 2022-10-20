@@ -39,15 +39,28 @@ CONTRACT game : public contract {
          uint64_t    current_time;
       };
 
+      struct HOUSE {
+         uint64_t       asset_id;
+         string         rarity;
+         uint32_t       holding_tools;
+         uint32_t       cooldown_hr;
+         uint32_t       energy;
+         uint32_t       energy_using;
+         string         coolingdown_bonus;
+         string         minting_bonus;
+         uint64_t       current_time;
+      };
+
       struct LAND {
          uint64_t       asset_id;
          string         rarity;
          uint32_t       cooldown_hr;
          uint32_t       energy;
-         uint32_t       max_energy;
          uint32_t       energy_using;
          uint8_t        blocks_count;
          vector<BLOCK>  blocks;
+         HOUSE          house;
+         asset          bonus;
          string         mining_bonus;
          string         minting_bonus;
          uint64_t       current_time;
