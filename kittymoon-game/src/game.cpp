@@ -1118,14 +1118,16 @@ ACTION game::receiverand(
       char* sp = strtok(bonus_c, ":");
 
       while(sp != NULL) {
+         string sp_str = sp;
+
          bonusrewards.modify(
             it_bonusreward,
             it_randnumber->player_account,
             [&](auto& s) {
-               s.common.amount += sp == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
-               s.uncommon.amount += sp == "uncommon" ? (gameconfig.get().reward_uncommon.amount * (result / 100.0)) : 0;
-               s.rare.amount += sp == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
-               s.legend.amount += sp == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
+               s.common.amount += sp_str == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
+               s.uncommon.amount += sp_str == "uncommon" ? (gameconfig.get().reward_uncommon.amount * (result / 100.0)) : 0;
+               s.rare.amount += sp_str == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
+               s.legend.amount += sp_str == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
             }
          );
 
