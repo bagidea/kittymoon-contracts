@@ -858,10 +858,12 @@ ACTION game::harvesting(
    uint32_t reward_rare          = 0;
    uint32_t reward_legend        = 0;
 
-   asset    penalised_common     = asset(0, config.get().CORE_TOKEN_SYMBOL);
-   asset    penalised_uncommon   = asset(0, config.get().CORE_TOKEN_SYMBOL);
-   asset    penalised_rare       = asset(0, config.get().CORE_TOKEN_SYMBOL);
-   asset    penalised_legend     = asset(0, config.get().CORE_TOKEN_SYMBOL);
+   asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
+
+   asset    penalised_common     = new_asset;
+   asset    penalised_uncommon   = new_asset;
+   asset    penalised_rare       = new_asset;
+   asset    penalised_legend     = new_asset;
 
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
@@ -1031,14 +1033,16 @@ ACTION game::sellreward(
       }
    );
 
+   asset new_asset = asset(0, config.get().CORE_TOKEN_SYMBOL);
+
    penaliseds.modify(
       it_penalised,
       player_account,
       [&](auto& s) {
-         s.common.amount   = 0;
-         s.uncommon.amount = 0;
-         s.rare.amount     = 0;
-         s.legend.amount   = 0;
+         s.common   = new_asset;
+         s.uncommon = new_asset;
+         s.rare     = new_asset;
+         s.legend   = new_asset;
       }
    );
 
@@ -1046,10 +1050,10 @@ ACTION game::sellreward(
       it_bonusreward,
       player_account,
       [&](auto& s) {
-         s.common.amount   = 0;
-         s.uncommon.amount = 0;
-         s.rare.amount     = 0;
-         s.legend.amount   = 0;
+         s.common   = new_asset;
+         s.uncommon = new_asset;
+         s.rare     = new_asset;
+         s.legend   = new_asset;
       }
    );
 
@@ -1061,6 +1065,7 @@ ACTION game::sellreward(
       config.get().CORE_TOKEN_ACCOUNT,
       "issuesuper"_n,
       make_tuple(
+         get_self(),
          player_account,
          quantity,
          string("sell::rewards - issue")
