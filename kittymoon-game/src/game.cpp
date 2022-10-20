@@ -936,7 +936,7 @@ ACTION game::harvesting(
                "requestrand"_n,
                make_tuple(
                   player_account.value,
-                  now(),
+                  now() + i,
                   get_self()
                )
             ).send();
