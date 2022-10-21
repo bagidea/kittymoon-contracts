@@ -211,6 +211,18 @@ CONTRACT game : public contract {
       typedef singleton<"gameconfig"_n, game_config> gameconfig_t;
       typedef multi_index<"gameconfig"_n, game_config> gameconfig_t_for_abi;
 
+      TABLE nft_template {
+         int32_t    reward_common_template_id;
+         int32_t    reward_uncommon_template_id;
+         int32_t    reward_rare_template_id;
+         int32_t    reward_legend_template_id;
+         int32_t    seed_pack_template_id;
+         int32_t    tool_pack_template_id;
+      };
+
+      typedef singleton<"nfttemplate"_n, nft_template> nfttemplate_t;
+      typedef multi_index<"nfttemplate"_n, nft_template> nfttemplate_t_for_abi;
+
       TABLE player {
          name        player_account;
          string      player_name;
