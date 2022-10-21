@@ -62,6 +62,17 @@ ACTION game::setgameconfig(
    );
 }
 
+ACTION game::setnftconfig(
+   int32_t     reward_common_template_id,
+   int32_t     reward_uncommon_template_id,
+   int32_t     reward_rare_template_id,
+   int32_t     reward_legend_template_id,
+   int32_t     seed_pack_template_id,
+   int32_t     tool_pack_template_id
+) {
+   require_auth(get_self());
+}
+
 ACTION game::signup(
    name     player_account,
    string   player_name

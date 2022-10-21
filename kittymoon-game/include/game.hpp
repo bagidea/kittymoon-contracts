@@ -94,6 +94,15 @@ CONTRACT game : public contract {
          uint32_t    penalised_common_uncommon
       );
 
+      ACTION setnftconfig(
+         int32_t     reward_common_template_id,
+         int32_t     reward_uncommon_template_id,
+         int32_t     reward_rare_template_id,
+         int32_t     reward_legend_template_id,
+         int32_t     seed_pack_template_id,
+         int32_t     tool_pack_template_id
+      );
+
       ACTION signup(
          name     player_account,
          string   player_name
@@ -220,8 +229,8 @@ CONTRACT game : public contract {
          int32_t    tool_pack_template_id;
       };
 
-      typedef singleton<"nfttemplate"_n, nft_template> nfttemplate_t;
-      typedef multi_index<"nfttemplate"_n, nft_template> nfttemplate_t_for_abi;
+      typedef singleton<"nfttemplates"_n, nft_template> nfttemplate_t;
+      typedef multi_index<"nfttemplates"_n, nft_template> nfttemplate_t_for_abi;
 
       TABLE player {
          name        player_account;
@@ -317,6 +326,7 @@ CONTRACT game : public contract {
 
       config_t config = config_t(get_self(), get_self().value);
       gameconfig_t gameconfig = gameconfig_t(get_self(), get_self().value);
+      nfttemplate_t nfttemplates = nfttemplate_t(get_self(), get_self().value);
       player_t players = player_t(get_self(), get_self().value);
       seed_t seeds = seed_t(get_self(), get_self().value);
       reward_t rewards = reward_t(get_self(), get_self().value);
