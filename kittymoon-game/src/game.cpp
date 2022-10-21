@@ -71,6 +71,18 @@ ACTION game::setnftconfig(
    int32_t     tool_pack_template_id
 ) {
    require_auth(get_self());
+
+   nfttemplates.set(
+      {
+         .reward_common_template_id    = reward_common_template_id,
+         .reward_uncommon_template_id, = reward_uncommon_template_id,
+         .reward_rare_template_id,     = reward_rare_template_id;
+         .reward_legend_template_id,   = reward_legend_template_id;
+         .seed_pack_template_id,       = seed_pack_template_id;
+         .tool_pack_template_id        = tool_pack_template_id;
+      },
+      get_self()
+   );
 }
 
 ACTION game::signup(
