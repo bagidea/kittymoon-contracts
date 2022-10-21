@@ -640,6 +640,8 @@ ACTION game::preparing(
    auto it_tool = tools.find(player_account.value);
    check(it_tool != tools.end(), "not found player from account");
 
+   check(blocks_index.size() > 0, "not select blocks yet");
+
    bool found_tool = false;
    uint8_t selected = 0;
    uint32_t use_energy = 0;
@@ -714,6 +716,8 @@ ACTION game::puttheseed(
    auto it_land = lands.find(player_account.value);
    check(it_land != lands.end(), "not found land from account");
 
+   check(blocks_index.size() > 0, "not select blocks yet");
+
    if(land_num == 0) check(it_land->lands.size() == 1, "can't used land default");
    else check(it_land->lands.size() > 1, "you don't have lands staking");
 
@@ -765,6 +769,8 @@ ACTION game::watering(
 
    auto it_tool = tools.find(player_account.value);
    check(it_tool != tools.end(), "not found player from account");
+
+   check(blocks_index.size() > 0, "not select blocks yet");
 
    bool found_tool = false;
    uint8_t selected = 0;
@@ -841,6 +847,8 @@ ACTION game::harvesting(
 
    auto it_tool = tools.find(player_account.value);
    check(it_tool != tools.end(), "not found player from account");
+
+   check(blocks_index.size() > 0, "not select blocks yet");
 
    bool found_tool = false;
    uint8_t selected = 0;
