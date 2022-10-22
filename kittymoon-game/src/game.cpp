@@ -29,7 +29,7 @@ ACTION game::setconfig(
 
 ACTION game::setgameconfig(
    uint32_t    first_energy,
-   uint32_t    land_limit,
+   uint8_t     land_limit,
    asset       reward_common,
    asset       reward_uncommon,
    asset       reward_rare,
@@ -635,8 +635,12 @@ ACTION game::unstake(
    else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
       auto it_land = lands.find(player_account.value);
       check(it_land != lands.end(), "not found land table from account");
+      check(it_land->lands.size() > 1, "can't unstake, because you have default land only");
 
       bool success = false;
+
+      for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+      }
 
       check(success, "not found land asset from id");
    } else {
