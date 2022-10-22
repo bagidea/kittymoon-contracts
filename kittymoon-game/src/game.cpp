@@ -1321,22 +1321,63 @@ void game::on_transfer_nft(
          }
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
-         check(false, "Land.");
+         string rarity = get<string>(imdata["rarity"]);
+         uint32_t cooldown_hr = get<uint64_t>(imdata["cooldown_hr"]);
+         uint32_t energy = get<uint64_t>(imdata["energy"]);
+         uint32_t energy_using = get<uint64_t>(imdata["energy_using"]);
+         uint32_t blocks_count = get<uint64_t>(imdata["blocks"]);
+         string mining_bonus = get<string>(imdata["mining_bonus"]);
+         string minting_bonus = get<string>(imdata["minting_bonus"]);
+
+         HOUSE house;
+         house.asset_id             = 0;
+         house.rarity               = "";
+         house.holding_tools        = 0;
+         house.cooldown_hr          = 0;
+         house.energy               = 0;
+         house.energy_using         = 0;
+         house.coolingdown_bonus    = "";
+         house.minting_bonus        = "";
+         house.current_time         = 0;
+
+         LAND land_asset;
+         land_asset.asset_id         = asset_ids[0];
+         land_asset.rarity           = rarity;
+         land_asset.cooldown_hr      = cooldown_hr;
+         land_asset.energy           = energy;
+         land_asset.energy_using     = energy_using;
+         land_asset.blocks_count     = blocks_count;
+         land_asset.house            = house;
+         land_asset.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
+         land_asset.mining_bonus     = mining_bonus;
+         land_asset.minting_bonus    = minting_bonus;
+         land_asset.current_time     = now();
+
+         for(uint8_t i = 0; i < blocks_count; i++) {
+            BLOCK new_block;
+            new_block.status        = "ready";
+            new_block.rarity        = "";
+            new_block.cooldown_hr   = 0;
+            new_block.current_time  = 0;
+
+            land_asset.blocks.push_back(new_block);
+         }
 
          auto it_land = lands.find(from.value);
          check(it_land != lands.end(), "not found land from account");
 
-         bool is_ready = true;
-
          if(it_land->lands.size() <= 1) {
             for(uint8_t i = 0; i < it_land->lands[0].blocks.size(); i++) {
-               if(it_land->lands[0].blocks[i].status != "ready") {
-                  is_ready = false;
-                  break;
-               }
+               check(it_land->lands[0].blocks[i].status == "ready", "the default land is not yet ready to stake, please check all blocks status");
             }
 
-            check(is_ready, "the default land is not yet ready to stake");
+            lands.modify(
+               it_land,
+               get_self(),
+               [&](auto& s) {
+                  s.lands.push_back(land_asset);
+               }
+            );
          } else {
          }
       }
