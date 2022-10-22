@@ -631,21 +631,6 @@ ACTION game::unstake(
       }
 
       check(success, "not found asset from id");
-
-      action(
-         permission_level {
-            get_self(),
-            "active"_n
-         },
-         ASSETS_ACCOUNT,
-         "transfer"_n,
-         make_tuple(
-            get_self(),
-            player_account,
-            vector<uint64_t>({ asset_id }),
-            string("unstake")
-         )
-      ).send();
    }
    else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
       auto it_land = lands.find(player_account.value);
@@ -657,6 +642,21 @@ ACTION game::unstake(
    } else {
       check(false, "this schema has not supported");
    }
+
+   action(
+      permission_level {
+         get_self(),
+         "active"_n
+      },
+      ASSETS_ACCOUNT,
+      "transfer"_n,
+      make_tuple(
+         get_self(),
+         player_account,
+         vector<uint64_t>({ asset_id }),
+         string("unstake")
+      )
+   ).send();
 }
 
 ACTION game::preparing(
