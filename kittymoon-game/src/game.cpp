@@ -640,6 +640,20 @@ ACTION game::unstake(
       bool success = false;
 
       for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+         if(it_land->lands[i].asset_id == asset_id) {
+            // for testnet 1 hr equal 1 second
+            check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown.");
+            //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown.");
+
+            check(it_player->energy >= it_land->lands[i].energy, "not enough energy for unstake land");
+
+            for(uint8_t a = 0; a < it_land->lands[i].blocks_count; a++) {
+               check(it_land->lands[i].blocks[a].status == "ready", "can't unstake, the land has some block not ready");
+            }
+
+            success = true;
+            break;
+         }
       }
 
       check(success, "not found land asset from id");
