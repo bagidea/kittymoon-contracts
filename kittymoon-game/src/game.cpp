@@ -626,10 +626,6 @@ ACTION game::unstake(
                }
             }
          );
-      }
-      else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
-         auto it_land = lands(player_account.value);
-         check(it_land != lands.end(), "not found land table from account");
       } else {
          check(false, "tool key not support");
       }
@@ -650,6 +646,14 @@ ACTION game::unstake(
             string("unstake")
          )
       ).send();
+   }
+   else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
+      auto it_land = lands.find(player_account.value);
+      check(it_land != lands.end(), "not found land table from account");
+
+      bool success = false;
+
+      check(success, "not found land asset from id");
    } else {
       check(false, "this schema has not supported");
    }
