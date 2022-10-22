@@ -626,6 +626,9 @@ ACTION game::unstake(
                }
             }
          );
+      }
+      else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
+         check(false, "unstake land")
       } else {
          check(false, "tool key not support");
       }
@@ -1379,9 +1382,7 @@ void game::on_transfer_nft(
          lands.modify(
             it_land,
             get_self(),
-            [&](auto& s) {
-               s.lands.push_back(land_asset);
-            }
+            [&](auto& s) { s.lands.push_back(land_asset); }
          );
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
