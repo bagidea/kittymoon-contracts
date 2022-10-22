@@ -99,7 +99,7 @@ ACTION game::signup(
    check(it_player == players.end(), "this account is exist");
 
    players.emplace(
-      player_account,
+      get_self(),
       [&](auto& s) {
          s.player_account  = player_account;
          s.player_name     = player_name;
@@ -388,7 +388,7 @@ ACTION game::modifyname(
 
    players.modify(
       it_player,
-      player_account,
+      get_self(),
       [&](auto& s) {
          s.player_name = player_name;
       }
@@ -412,7 +412,7 @@ ACTION game::addenergy(
 
    players.modify(
       it_player,
-      player_account,
+      get_self(),
       [&](auto& s) {
          s.energy += energy;
       }
@@ -646,10 +646,26 @@ ACTION game::unstake(
             //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown.");
 
             check(it_player->energy >= it_land->lands[i].energy, "not enough energy for unstake land");
+            check(it_land->lands[i].house.asset_id == 0, "can't unstake, you need to unstake house on this land first");
 
             for(uint8_t a = 0; a < it_land->lands[i].blocks_count; a++) {
                check(it_land->lands[i].blocks[a].status == "ready", "can't unstake, the land has some block not ready");
             }
+
+            players.modify(
+               it_player,
+               get_self(),
+               [&](auto& s) {
+                  s.energy     -= it_land->lands[i].energy;
+                  s.max_energy -= it_land->lands[i].energy;
+               }
+            );
+
+            lands.modify(
+               it_land,
+               get_self(),
+               [&](auto& s) { s.lands.erase(s.lands.begin() + i); }
+            );
 
             success = true;
             break;
@@ -737,7 +753,7 @@ ACTION game::preparing(
 
    players.modify(
       it_player,
-      player_account,
+      get_self(),
       [&](auto& s) {
          s.energy -= use_energy;
       }
@@ -747,8 +763,8 @@ ACTION game::preparing(
       it_tool,
       get_self(),
       [&](auto& s) {
-         s.toolhoes[selected].energy -= use_energy;
-         s.toolhoes[selected].current_time = now();
+         s.toolhoes[selected].energy       -= use_energy;
+         s.toolhoes[selected].current_time  = now();
       }
    );
 }
@@ -869,7 +885,7 @@ ACTION game::watering(
 
    players.modify(
       it_player,
-      player_account,
+      get_self(),
       [&](auto& s) {
          s.energy -= use_energy;
       }
@@ -1056,7 +1072,7 @@ ACTION game::harvesting(
 
    players.modify(
       it_player,
-      player_account,
+      get_self(),
       [&](auto& s) {
          s.energy -= use_energy;
       }
@@ -1273,6 +1289,9 @@ void game::on_transfer_nft(
          idxSchema->format
       );
 
+      auto it_player = players.find(from.value);
+      check(it_player != players.end(), "not found player account");
+
       if(idxCard->schema_name == config.get().ASSETS_SCHEMA_SEEDS) {
          string rarity = get<string>(imdata["rarity"]);
 
@@ -1326,9 +1345,6 @@ void game::on_transfer_nft(
          tool.blocks = blocks;
          tool.mining_bonus = mining_bonus;
          tool.current_time = 0;
-
-         auto it_player = players.find(from.value);
-         check(it_player != players.end(), "not found player account");
 
          auto it_tool = tools.find(from.value);
          check(it_tool != tools.end(), "not found tools table from account");
@@ -1406,6 +1422,15 @@ void game::on_transfer_nft(
             it_land,
             get_self(),
             [&](auto& s) { s.lands.push_back(land_asset); }
+         );
+
+         players.modify(
+            it_player,
+            get_self(),
+            [&](auto& s) {
+               s.energy += energy;
+               s.max_energy += energy;
+            }
          );
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
