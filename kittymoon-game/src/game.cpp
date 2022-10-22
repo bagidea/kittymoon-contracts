@@ -628,7 +628,8 @@ ACTION game::unstake(
          );
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
-         check(false, "unstake land")
+         auto it_land = lands(player_account.value);
+         check(it_land != lands.end(), "not found land table from account");
       } else {
          check(false, "tool key not support");
       }
@@ -694,7 +695,7 @@ ACTION game::preparing(
    check(it_player->energy >= use_energy, "player not enough energy");
 
    auto it_land = lands.find(player_account.value);
-   check(it_land != lands.end(), "not found land from account");
+   check(it_land != lands.end(), "not found land table from account");
 
    if(land_num == 0) check(it_land->lands.size() == 1, "can't used land default");
    else check(it_land->lands.size() > 1, "you don't have lands staking");
@@ -742,7 +743,7 @@ ACTION game::puttheseed(
    check(it_player != players.end(), "not found player from account");
 
    auto it_land = lands.find(player_account.value);
-   check(it_land != lands.end(), "not found land from account");
+   check(it_land != lands.end(), "not found land table from account");
 
    check(blocks_index.size() > 0, "not select blocks yet");
 
@@ -824,7 +825,7 @@ ACTION game::watering(
    check(it_player->energy >= use_energy, "player not enough energy");
 
    auto it_land = lands.find(player_account.value);
-   check(it_land != lands.end(), "not found land from account");
+   check(it_land != lands.end(), "not found land table from account");
 
    if(land_num == 0) check(it_land->lands.size() == 1, "can't used land default");
    else check(it_land->lands.size() > 1, "you don't have lands staking");
@@ -902,7 +903,7 @@ ACTION game::harvesting(
    check(it_player->energy >= use_energy, "player not enough energy");
 
    auto it_land = lands.find(player_account.value);
-   check(it_land != lands.end(), "not found land from account");
+   check(it_land != lands.end(), "not found land table from account");
 
    if(land_num == 0) check(it_land->lands.size() == 1, "can't used land default");
    else check(it_land->lands.size() > 1, "you don't have lands staking");
@@ -1369,7 +1370,7 @@ void game::on_transfer_nft(
          }
 
          auto it_land = lands.find(from.value);
-         check(it_land != lands.end(), "not found land from account");
+         check(it_land != lands.end(), "not found land table from account");
 
          if(it_land->lands.size() == 1) {
             for(uint8_t i = 0; i < it_land->lands[0].blocks.size(); i++) {
