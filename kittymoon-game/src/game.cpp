@@ -1322,6 +1322,23 @@ void game::on_transfer_nft(
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_LANDS) {
          check(false, "Land.");
+
+         auto it_land = lands.find(from.value);
+         check(it_land != lands.end(), "not found land from account");
+
+         bool is_ready = true;
+
+         if(it_land->lands.size() <= 1) {
+            for(uint8_t i = 0; i < it_land->lands[0].blocks.size(); i++) {
+               if(it_land->lands[0].blocks[i].status != "ready") {
+                  is_ready = false;
+                  break;
+               }
+            }
+
+            check(is_ready, "the default land is not yet ready to stake");
+         } else {
+         }
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
          check(false, "House.");
