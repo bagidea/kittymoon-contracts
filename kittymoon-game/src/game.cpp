@@ -29,6 +29,7 @@ ACTION game::setconfig(
 
 ACTION game::setgameconfig(
    uint32_t    first_energy,
+   uint32_t    land_limit,
    asset       reward_common,
    asset       reward_uncommon,
    asset       reward_rare,
@@ -46,6 +47,7 @@ ACTION game::setgameconfig(
    gameconfig.set(
       {
          .first_energy                 = first_energy,
+         .land_limit                   = land_limit,
          .reward_common                = reward_common,
          .reward_uncommon              = reward_uncommon,
          .reward_rare                  = reward_rare,
@@ -1366,20 +1368,21 @@ void game::on_transfer_nft(
          auto it_land = lands.find(from.value);
          check(it_land != lands.end(), "not found land from account");
 
-         if(it_land->lands.size() <= 1) {
+         if(it_land->lands.size() == 1) {
             for(uint8_t i = 0; i < it_land->lands[0].blocks.size(); i++) {
                check(it_land->lands[0].blocks[i].status == "ready", "the default land is not yet ready to stake, please check all blocks status");
             }
-
-            lands.modify(
-               it_land,
-               get_self(),
-               [&](auto& s) {
-                  s.lands.push_back(land_asset);
-               }
-            );
          } else {
+            check(it_land->lands.size() < gameconfig.get().land_limit, "can't stake land, because full land limited");
          }
+
+         lands.modify(
+            it_land,
+            get_self(),
+            [&](auto& s) {
+               s.lands.push_back(land_asset);
+            }
+         );
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
          check(false, "House.");

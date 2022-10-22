@@ -81,6 +81,7 @@ CONTRACT game : public contract {
 
       ACTION setgameconfig(
          uint32_t    first_energy,
+         uint32_t    land_limit,
          asset       reward_common,
          asset       reward_uncommon,
          asset       reward_rare,
@@ -204,6 +205,7 @@ CONTRACT game : public contract {
 
       TABLE game_config {
          uint32_t    first_energy;
+         uint32_t    land_limit;
          asset       reward_common;
          asset       reward_uncommon;
          asset       reward_rare;
