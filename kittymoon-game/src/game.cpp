@@ -191,6 +191,7 @@ ACTION game::signup(
 
          LAND land_default;
          land_default.asset_id         = 0;
+         land_default.slot_index       = 0;
          land_default.rarity           = "default";
          land_default.cooldown_hr      = 0;
          land_default.energy           = 0;
@@ -344,6 +345,7 @@ ACTION game::repairplayer(
 
             LAND land_default;
             land_default.asset_id         = 0;
+            land_default.slot_index       = 0;
             land_default.rarity           = "default";
             land_default.cooldown_hr      = 0;
             land_default.energy           = 0;
@@ -1373,6 +1375,8 @@ void game::on_transfer_nft(
          string mining_bonus = get<string>(imdata["mining_bonus"]);
          string minting_bonus = get<string>(imdata["minting_bonus"]);
 
+         uint8_t slot_index = stoi(memo.substr(5));
+
          HOUSE house;
          house.asset_id             = 0;
          house.rarity               = "";
@@ -1386,6 +1390,7 @@ void game::on_transfer_nft(
 
          LAND land_asset;
          land_asset.asset_id         = asset_ids[0];
+         land_asset.slot_index       = slot_index;
          land_asset.rarity           = rarity;
          land_asset.cooldown_hr      = cooldown_hr;
          land_asset.energy           = energy;
@@ -1416,6 +1421,12 @@ void game::on_transfer_nft(
             }
          } else {
             check(it_land->lands.size() < gameconfig.get().land_limit + 1, "can't stake land, because full land limited");
+         }
+
+         check(slot_index > 0 && slot_index <= gameconfig.get().land_limit, "incorrect slot index");
+
+         for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+            check(it_land->lands[i].slot_index != slot_index, "the land is already in slot index");
          }
 
          lands.modify(

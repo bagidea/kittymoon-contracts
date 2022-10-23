@@ -53,6 +53,7 @@ CONTRACT game : public contract {
 
       struct LAND {
          uint64_t       asset_id;
+         uint8_t        slot_index;
          string         rarity;
          uint32_t       cooldown_hr;
          uint32_t       energy;
