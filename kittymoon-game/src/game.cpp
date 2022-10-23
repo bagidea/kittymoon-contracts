@@ -1415,7 +1415,7 @@ void game::on_transfer_nft(
                check(it_land->lands[0].blocks[i].status == "ready", "the default land is not yet ready to stake, please check all blocks status");
             }
          } else {
-            check(it_land->lands.size() < gameconfig.get().land_limit, "can't stake land, because full land limited");
+            check(it_land->lands.size() < gameconfig.get().land_limit + 1, "can't stake land, because full land limited");
          }
 
          lands.modify(
