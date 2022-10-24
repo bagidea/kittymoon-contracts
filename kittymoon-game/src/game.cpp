@@ -854,7 +854,7 @@ ACTION game::puttheseed(
 ACTION game::watering(
    name              player_account,
    uint64_t          asset_id,
-   uint8_t           land_num,
+   uint8_t           slot_index,
    vector<uint8_t>   blocks_index
 ) {
    require_auth(player_account);
@@ -893,8 +893,21 @@ ACTION game::watering(
    auto it_land = lands.find(player_account.value);
    check(it_land != lands.end(), "not found land table from account");
 
-   if(land_num == 0) check(it_land->lands.size() == 1, "can't used land default");
+   if(slot_index == 0) check(it_land->lands.size() == 1, "can't used land default");
    else check(it_land->lands.size() > 1, "you don't have lands staking");
+
+   int8_t land_num = slot_index == 0 ? 0 : -1;
+
+   if(land_num == -1) {
+      for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+         if(it_land->lands[i].slot_index == slot_index) {
+            land_num = i;
+            break;
+         }
+      }
+   }
+
+   check(land_num > -1, "not found land in slot index");
 
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
