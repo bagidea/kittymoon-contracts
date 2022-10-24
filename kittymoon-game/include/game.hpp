@@ -140,7 +140,7 @@ CONTRACT game : public contract {
       ACTION preparing(
          name              player_account,
          uint64_t          asset_id,
-         uint8_t           land_num,
+         uint8_t           slot_index,
          vector<uint8_t>   blocks_index
       );
 
