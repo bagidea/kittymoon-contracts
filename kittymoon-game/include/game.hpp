@@ -147,7 +147,7 @@ CONTRACT game : public contract {
       ACTION puttheseed(
          name              player_account,
          string            rarity,
-         uint8_t           land_num,
+         uint8_t           slot_index,
          vector<uint8_t>   blocks_index
       );
 

@@ -787,7 +787,7 @@ ACTION game::preparing(
 ACTION game::puttheseed(
    name              player_account,
    string            rarity,
-   uint8_t           land_num,
+   uint8_t           slot_index,
    vector<uint8_t>   blocks_index
 ) {
    require_auth(player_account);
@@ -800,8 +800,21 @@ ACTION game::puttheseed(
 
    check(blocks_index.size() > 0, "not select blocks yet");
 
-   if(land_num == 0) check(it_land->lands.size() == 1, "can't used land default");
+   if(slot_index == 0) check(it_land->lands.size() == 1, "can't used land default");
    else check(it_land->lands.size() > 1, "you don't have lands staking");
+
+   int8_t land_num = slot_index == 0 ? 0 : -1;
+
+   if(land_num == -1) {
+      for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+         if(it_land->lands[i].slot_index == slot_index) {
+            land_num = i;
+            break;
+         }
+      }
+   }
+
+   check(land_num > -1, "not found land in slot index");
 
    auto it_seed = seeds.find(player_account.value);
    check(it_seed != seeds.end(), "not found seeds from account");
