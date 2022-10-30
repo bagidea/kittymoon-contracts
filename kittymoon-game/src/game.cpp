@@ -645,7 +645,7 @@ ACTION game::unstake(
          if(it_land->lands[i].asset_id == asset_id) {
             // for testnet 1 hr equal 1 second
             check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
-            //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
+            //check(now() - it_land->lands[i].current_time >= 60 * 60 * it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
 
             check(it_player->energy >= it_land->lands[i].energy, "not enough energy for unstake land");
             check(it_land->lands[i].house.asset_id == 0, "can't unstake, you need to unstake house on this land first");
@@ -690,7 +690,7 @@ ACTION game::unstake(
          if(it_land->lands[i].house.asset_id == asset_id) {
             // for testnet 1 hr equal 1 second
             check(now() - it_land->lands[i].house.current_time >= it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
-            //check(now() - it_land->lands[i].house.current_time >= 60 * 60 *it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
+            //check(now() - it_land->lands[i].house.current_time >= 60 * 60 * it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
 
             uint8_t tools_per_type_minus = stoi(it_land->lands[i].house.holding_tools.substr(0, 1));
 
@@ -780,7 +780,7 @@ ACTION game::preparing(
 
          // for testnet 1 hr equal 1 second
          check(now() - it_tool->toolhoes[selected].current_time >= it_tool->toolhoes[selected].cooldown_hr, "tool not ready");
-         //check(now() - it_tool->toolhoes[selected].current_time >= 60 * 60 *it_tool->toolhoes[selected].cooldown_hr, "tool not ready");
+         //check(now() - it_tool->toolhoes[selected].current_time >= 60 * 60 * it_tool->toolhoes[selected].cooldown_hr, "tool not ready");
          check(it_tool->toolhoes[selected].energy >= use_energy, "tool not enough energy");
          check(it_tool->toolhoes[selected].blocks >= blocks_index.size(), "tool not enough blocks");
 
@@ -831,12 +831,20 @@ ACTION game::preparing(
       }
    );
 
+   uint64_t coolingdown_bonus = 0;
+
+   if(it_land->lands[land_num].house.asset_id != 0) {
+      // for testnet 1 hr equal 1 second
+      coolingdown_bonus = stoll(it_land->lands[land_num].house.coolingdown_bonus.substr(0, 1));
+      //coolingdown_bonus = 60 * 60 * stoll(it_land->lands[land_num].house.coolingdown_bonus.substr(0, 1));
+   }
+
    tools.modify(
       it_tool,
       get_self(),
       [&](auto& s) {
          s.toolhoes[selected].energy       -= use_energy;
-         s.toolhoes[selected].current_time  = now();
+         s.toolhoes[selected].current_time  = now() + coolingdown_bonus;
       }
    );
 }
@@ -936,7 +944,7 @@ ACTION game::watering(
 
          // for testnet 1 hr equal 1 second
          check(now() - it_tool->toolcans[selected].current_time >= it_tool->toolcans[selected].cooldown_hr, "tool not ready");
-         //check(now() - it_tool->toolcans[selected].current_time >= 60 * 60 *it_tool->toolcans[selected].cooldown_hr, "tool not ready");
+         //check(now() - it_tool->toolcans[selected].current_time >= 60 * 60 * it_tool->toolcans[selected].cooldown_hr, "tool not ready");
          check(it_tool->toolcans[selected].energy >= use_energy, "tool not enough energy");
          check(it_tool->toolcans[selected].blocks >= blocks_index.size(), "tool not enough blocks");
 
@@ -966,6 +974,14 @@ ACTION game::watering(
 
    check(land_num > -1, "not found land in slot index");
 
+   uint64_t coolingdown_bonus = 0;
+
+   if(it_land->lands[land_num].house.asset_id != 0) {
+      // for testnet 1 hr equal 1 second
+      coolingdown_bonus = stoll(it_land->lands[land_num].house.coolingdown_bonus.substr(0, 1));
+      //coolingdown_bonus = 60 * 60 * stoll(it_land->lands[land_num].house.coolingdown_bonus.substr(0, 1));
+   }
+
    for(uint8_t i = 0; i < blocks_index.size(); i++) {
       check(blocks_index[i] < it_land->lands[land_num].blocks.size(), "incorrect block index");
       check(it_land->lands[land_num].blocks[blocks_index[i]].status == "watering", "some blocks is not put seed");
@@ -976,7 +992,7 @@ ACTION game::watering(
          [&](auto& s) {
             s.lands[land_num].blocks[blocks_index[i]].status       = "harvesting";
             s.lands[land_num].blocks[blocks_index[i]].cooldown_hr  = gameconfig.get().cooldown_growing;
-            s.lands[land_num].blocks[blocks_index[i]].current_time = now();
+            s.lands[land_num].blocks[blocks_index[i]].current_time = now() + coolingdown_bonus;
          }
       );
    }
@@ -994,7 +1010,7 @@ ACTION game::watering(
       get_self(),
       [&](auto& s) {
          s.toolcans[selected].energy      -= use_energy;
-         s.toolcans[selected].current_time = now();
+         s.toolcans[selected].current_time = now() + coolingdown_bonus;
       }
    );
 }
@@ -1027,7 +1043,7 @@ ACTION game::harvesting(
 
          // for testnet 1 hr equal 1 second
          check(now() - it_tool->toolaxes[selected].current_time >= it_tool->toolaxes[selected].cooldown_hr, "tool not ready");
-         //check(now() - it_tool->toolaxes[selected].current_time >= 60 * 60 *it_tool->toolaxes[selected].cooldown_hr, "tool not ready");
+         //check(now() - it_tool->toolaxes[selected].current_time >= 60 * 60 * it_tool->toolaxes[selected].cooldown_hr, "tool not ready");
          check(it_tool->toolaxes[selected].energy >= use_energy, "tool not enough energy");
          check(it_tool->toolaxes[selected].blocks >= blocks_index.size(), "tool not enough blocks");
 
@@ -1189,12 +1205,20 @@ ACTION game::harvesting(
       }
    );
 
+   uint64_t coolingdown_bonus = 0;
+
+   if(it_land->lands[land_num].house.asset_id != 0) {
+      // for testnet 1 hr equal 1 second
+      coolingdown_bonus = stoll(it_land->lands[land_num].house.coolingdown_bonus.substr(0, 1));
+      //coolingdown_bonus = 60 * 60 * stoll(it_land->lands[land_num].house.coolingdown_bonus.substr(0, 1));
+   }
+
    tools.modify(
       it_tool,
       get_self(),
       [&](auto& s) {
          s.toolaxes[selected].energy      -= use_energy;
-         s.toolaxes[selected].current_time = now();
+         s.toolaxes[selected].current_time = now() + coolingdown_bonus;
       }
    );
 
