@@ -176,7 +176,7 @@ ACTION game::signup(
    HOUSE house;
    house.asset_id             = 0;
    house.rarity               = "";
-   house.holding_tools        = 0;
+   house.holding_tools        = "";
    house.cooldown_hr          = 0;
    house.energy               = 0;
    house.energy_using         = 0;
@@ -330,7 +330,7 @@ ACTION game::repairplayer(
       HOUSE house;
       house.asset_id             = 0;
       house.rarity               = "";
-      house.holding_tools        = 0;
+      house.holding_tools        = "";
       house.cooldown_hr          = 0;
       house.energy               = 0;
       house.energy_using         = 0;
@@ -675,6 +675,15 @@ ACTION game::unstake(
       }
 
       check(success, "not found land asset from id");
+   }
+   else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
+      auto it_land = lands.find(player_account.value);
+      check(it_land != lands.end(), "not found land table from account");
+      check(it_land->lands.size() > 1, "can't unstake, because you have default land only");
+
+      bool success = false;
+
+      check(success, "not found house asset from id");
    } else {
       check(false, "this schema has not supported");
    }
@@ -1432,7 +1441,7 @@ void game::on_transfer_nft(
          HOUSE house;
          house.asset_id             = 0;
          house.rarity               = "";
-         house.holding_tools        = 0;
+         house.holding_tools        = "";
          house.cooldown_hr          = 0;
          house.energy               = 0;
          house.energy_using         = 0;
@@ -1497,7 +1506,59 @@ void game::on_transfer_nft(
          );
       }
       else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
-         check(false, "House.");
+         string rarity = get<string>(imdata["rarity"]);
+         string holding_tools = get<string>(imdata["holding_tools"]);
+         uint32_t cooldown_hr = get<uint64_t>(imdata["cooldown_hr"]);
+         uint32_t energy = get<uint64_t>(imdata["energy"]);
+         uint32_t energy_using = get<uint64_t>(imdata["energy_using"]);
+         string coolingdown_bonus = get<string>(imdata["coolingdown_bonus"]);
+         string minting_bonus = get<string>(imdata["minting_bonus"]);
+
+         uint8_t slot_index = stoi(memo.substr(5));
+
+         HOUSE house;
+         house.asset_id             = asset_ids[0];
+         house.rarity               = rarity;
+         house.holding_tools        = holding_tools;
+         house.cooldown_hr          = cooldown_hr;
+         house.energy               = energy;
+         house.energy_using         = energy_using;
+         house.coolingdown_bonus    = coolingdown_bonus;
+         house.minting_bonus        = minting_bonus;
+         house.current_time         = now();
+
+         auto it_land = lands.find(from.value);
+         check(it_land != lands.end(), "not found land table from account");
+         check(it_land->lands.size() > 1, "you can't stake house, you need to stake land first");
+         check(slot_index > 0 && slot_index < gameconfig.get().land_limit + 1, "incorrect land slot index");
+
+         uint8_t selected = 0;
+
+         for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+            if(it_land->lands[i].slot_index == slot_index) {
+               check(it_land->lands[i].house.asset_id != 0, "this land has stake house already");
+
+               selected = i;
+               break;
+            }
+         }
+
+         check(selected > 0, "not found land from slot index");
+
+         lands.modify(
+            it_land,
+            get_self(),
+            [&](auto& s) { s.lands[selected].house = house; }
+         );
+
+         players.modify(
+            it_player,
+            get_self(),
+            [&](auto& s) {
+               s.energy += energy;
+               s.max_energy += energy;
+            }
+         );
       } else {
          check(false, "this schema has not supported");
       }

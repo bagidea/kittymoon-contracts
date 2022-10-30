@@ -42,7 +42,7 @@ CONTRACT game : public contract {
       struct HOUSE {
          uint64_t       asset_id;
          string         rarity;
-         uint32_t       holding_tools;
+         string         holding_tools;
          uint32_t       cooldown_hr;
          uint32_t       energy;
          uint32_t       energy_using;
