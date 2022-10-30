@@ -644,8 +644,8 @@ ACTION game::unstake(
       for(uint8_t i = 1; i < it_land->lands.size(); i++) {
          if(it_land->lands[i].asset_id == asset_id) {
             // for testnet 1 hr equal 1 second
-            check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown.");
-            //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown.");
+            check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
+            //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
 
             check(it_player->energy >= it_land->lands[i].energy, "not enough energy for unstake land");
             check(it_land->lands[i].house.asset_id == 0, "can't unstake, you need to unstake house on this land first");
@@ -678,10 +678,55 @@ ACTION game::unstake(
    }
    else if(idxCard->schema_name == config.get().ASSETS_SCHEMA_HOUSE) {
       auto it_land = lands.find(player_account.value);
-      check(it_land != lands.end(), "not found land table from account");
-      check(it_land->lands.size() > 1, "can't unstake, because you have default land only");
+      check(it_land != lands.end(), "not found land table from account [house]");
+      check(it_land->lands.size() > 1, "you not have land and house staking");
 
       bool success = false;
+
+      for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+         if(it_land->lands[i].house.asset_id == asset_id) {
+            // for testnet 1 hr equal 1 second
+            check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown [house]");
+            //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown [house]");
+            check(now() - it_land->lands[i].house.current_time >= it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
+            //check(now() - it_land->lands[i].house.current_time >= 60 * 60 *it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
+
+            check(it_player->energy >= it_land->lands[i].house.energy, "not enough energy for unstake house");
+
+            for(uint8_t a = 0; a < it_land->lands[i].blocks_count; a++) {
+               check(it_land->lands[i].blocks[a].status == "ready", "can't unstake, the land has some block not ready");
+            }
+
+            players.modify(
+               it_player,
+               get_self(),
+               [&](auto& s) {
+                  s.energy     -= it_land->lands[i].house.energy;
+                  s.max_energy -= it_land->lands[i].house.energy;
+               }
+            );
+
+            HOUSE house;
+            house.asset_id             = 0;
+            house.rarity               = "";
+            house.holding_tools        = "";
+            house.cooldown_hr          = 0;
+            house.energy               = 0;
+            house.energy_using         = 0;
+            house.coolingdown_bonus    = "";
+            house.minting_bonus        = "";
+            house.current_time         = 0;
+
+            lands.modify(
+               it_land,
+               get_self(),
+               [&](auto& s) { s.lands[i].house = house; }
+            );
+
+            success = true;
+            break;
+         }
+      }
 
       check(success, "not found house asset from id");
    } else {
