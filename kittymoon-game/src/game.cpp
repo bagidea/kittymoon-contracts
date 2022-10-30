@@ -681,28 +681,31 @@ ACTION game::unstake(
       check(it_land != lands.end(), "not found land table from account [house]");
       check(it_land->lands.size() > 1, "you not have land and house staking");
 
+      auto it_tool = tools.find(player_account.value);
+      check(it_tool != tools.end(), "not found tools table from account");
+
       bool success = false;
 
       for(uint8_t i = 1; i < it_land->lands.size(); i++) {
          if(it_land->lands[i].house.asset_id == asset_id) {
             // for testnet 1 hr equal 1 second
-            check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown [house]");
-            //check(now() - it_land->lands[i].current_time >= 60 * 60 *it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown [house]");
             check(now() - it_land->lands[i].house.current_time >= it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
             //check(now() - it_land->lands[i].house.current_time >= 60 * 60 *it_land->lands[i].house.cooldown_hr, "the house has not yet completed cooldown");
 
-            check(it_player->energy >= it_land->lands[i].house.energy, "not enough energy for unstake house");
+            uint8_t tools_per_type_minus = stoi(it_land->lands[i].house.holding_tools.substr(0, 1));
 
-            for(uint8_t a = 0; a < it_land->lands[i].blocks_count; a++) {
-               check(it_land->lands[i].blocks[a].status == "ready", "can't unstake, the land has some block not ready");
-            }
+            check(it_player->tools_per_type - it_tool->toolhoes.size() > tools_per_type_minus, "check and unstake hoe tools first");
+            check(it_player->tools_per_type - it_tool->toolcans.size() > tools_per_type_minus, "check and unstake watering can tools first");
+            check(it_player->tools_per_type - it_tool->toolaxes.size() > tools_per_type_minus, "check and unstake axe tools first");
+            check(it_player->energy >= it_land->lands[i].house.energy, "not enough energy for unstake house");
 
             players.modify(
                it_player,
                get_self(),
                [&](auto& s) {
-                  s.energy     -= it_land->lands[i].house.energy;
-                  s.max_energy -= it_land->lands[i].house.energy;
+                  s.energy         -= it_land->lands[i].house.energy;
+                  s.max_energy     -= it_land->lands[i].house.energy;
+                  s.tools_per_type -= tools_per_type_minus;
                }
             );
 
@@ -1596,12 +1599,15 @@ void game::on_transfer_nft(
             [&](auto& s) { s.lands[selected].house = house; }
          );
 
+         uint8_t tools_per_type_plus = stoi(holding_tools.substr(0, 1));
+
          players.modify(
             it_player,
             get_self(),
             [&](auto& s) {
                s.energy += energy;
                s.max_energy += energy;
+               s.tools_per_type += tools_per_type_plus;
             }
          );
       } else {
