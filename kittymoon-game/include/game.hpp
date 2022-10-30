@@ -169,6 +169,16 @@ CONTRACT game : public contract {
          name        player_account
       );
 
+      ACTION claimland(
+         name     player_account,
+         uint8_t  slot_index
+      );
+
+      ACTION claimhouse(
+         name     player_account,
+         uint8_t  slot_index
+      );
+
       ACTION receiverand(
          uint64_t       assoc_id,
          checksum256&   random_value

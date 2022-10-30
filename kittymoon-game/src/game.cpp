@@ -1323,6 +1323,20 @@ ACTION game::sellreward(
    ).send();
 }
 
+ACTION game::claimland(
+   name     player_account,
+   uint8_t  slot_index
+) {
+   require_auth(player_account);
+}
+
+ACTION game::claimhouse(
+   name     player_account,
+   uint8_t  slot_index
+) {
+   require_auth(player_account);
+}
+
 ACTION game::receiverand(
    uint64_t       assoc_id,
    checksum256&   random_value
