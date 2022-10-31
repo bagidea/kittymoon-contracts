@@ -180,6 +180,7 @@ ACTION game::signup(
    house.cooldown_hr          = 0;
    house.energy               = 0;
    house.energy_using         = 0;
+   house.max_energy           = 0;
    house.coolingdown_bonus    = "";
    house.minting_bonus        = "";
    house.current_time         = 0;
@@ -196,6 +197,7 @@ ACTION game::signup(
          land_default.cooldown_hr      = 0;
          land_default.energy           = 0;
          land_default.energy_using     = 0;
+         land_default.max_energy       = 0;
          land_default.blocks_count     = 4;
          land_default.house            = house;
          land_default.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
@@ -334,6 +336,7 @@ ACTION game::repairplayer(
       house.cooldown_hr          = 0;
       house.energy               = 0;
       house.energy_using         = 0;
+      house.max_energy           = 0;
       house.coolingdown_bonus    = "";
       house.minting_bonus        = "";
       house.current_time         = 0;
@@ -350,6 +353,7 @@ ACTION game::repairplayer(
             land_default.cooldown_hr      = 0;
             land_default.energy           = 0;
             land_default.energy_using     = 0;
+            land_default.max_energy       = 0;
             land_default.blocks_count     = 4;
             land_default.house            = house;
             land_default.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
@@ -647,7 +651,7 @@ ACTION game::unstake(
             check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
             //check(now() - it_land->lands[i].current_time >= 60 * 60 * it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
 
-            check(it_player->energy >= it_land->lands[i].energy, "not enough energy for unstake land");
+            check(it_player->energy >= it_land->lands[i].max_energy, "not enough energy for unstake land");
             check(it_land->lands[i].house.asset_id == 0, "can't unstake, you need to unstake house on this land first");
 
             for(uint8_t a = 0; a < it_land->lands[i].blocks_count; a++) {
@@ -658,8 +662,8 @@ ACTION game::unstake(
                it_player,
                get_self(),
                [&](auto& s) {
-                  s.energy     -= it_land->lands[i].energy;
-                  s.max_energy -= it_land->lands[i].energy;
+                  s.energy     -= it_land->lands[i].max_energy;
+                  s.max_energy -= it_land->lands[i].max_energy;
                }
             );
 
@@ -697,14 +701,15 @@ ACTION game::unstake(
             check(it_player->tools_per_type - it_tool->toolhoes.size() > tools_per_type_minus, "check and unstake hoe tools first");
             check(it_player->tools_per_type - it_tool->toolcans.size() > tools_per_type_minus, "check and unstake watering can tools first");
             check(it_player->tools_per_type - it_tool->toolaxes.size() > tools_per_type_minus, "check and unstake axe tools first");
-            check(it_player->energy >= it_land->lands[i].house.energy, "not enough energy for unstake house");
+
+            check(it_player->energy >= it_land->lands[i].house.max_energy, "not enough energy for unstake house");
 
             players.modify(
                it_player,
                get_self(),
                [&](auto& s) {
-                  s.energy         -= it_land->lands[i].house.energy;
-                  s.max_energy     -= it_land->lands[i].house.energy;
+                  s.energy         -= it_land->lands[i].house.max_energy;
+                  s.max_energy     -= it_land->lands[i].house.max_energy;
                   s.tools_per_type -= tools_per_type_minus;
                }
             );
@@ -716,6 +721,7 @@ ACTION game::unstake(
             house.cooldown_hr          = 0;
             house.energy               = 0;
             house.energy_using         = 0;
+            house.max_energy           = 0;
             house.coolingdown_bonus    = "";
             house.minting_bonus        = "";
             house.current_time         = 0;

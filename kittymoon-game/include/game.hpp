@@ -46,6 +46,7 @@ CONTRACT game : public contract {
          uint32_t       cooldown_hr;
          uint32_t       energy;
          uint32_t       energy_using;
+         uint32_t       max_energy;
          string         coolingdown_bonus;
          string         minting_bonus;
          uint64_t       current_time;
@@ -58,6 +59,7 @@ CONTRACT game : public contract {
          uint32_t       cooldown_hr;
          uint32_t       energy;
          uint32_t       energy_using;
+         uint32_t       max_energy;
          uint8_t        blocks_count;
          vector<BLOCK>  blocks;
          HOUSE          house;
