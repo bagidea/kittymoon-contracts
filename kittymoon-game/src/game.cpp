@@ -183,7 +183,6 @@ ACTION game::signup(
    house.coolingdown_bonus    = "";
    house.minting_bonus        = "";
    house.current_time         = 0;
-   house.last_bonus           = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
    lands.emplace(
       get_self(),
@@ -338,7 +337,6 @@ ACTION game::repairplayer(
       house.coolingdown_bonus    = "";
       house.minting_bonus        = "";
       house.current_time         = 0;
-      house.last_bonus           = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
       lands.emplace(
          get_self(),
@@ -721,7 +719,6 @@ ACTION game::unstake(
             house.coolingdown_bonus    = "";
             house.minting_bonus        = "";
             house.current_time         = 0;
-            house.last_bonus           = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
             lands.modify(
                it_land,
@@ -1624,21 +1621,20 @@ void game::on_transfer_nft(
          house.coolingdown_bonus    = "";
          house.minting_bonus        = "";
          house.current_time         = 0;
-         house.last_bonus           = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
-         LAND last_bonus;
-         last_bonus.asset_id         = asset_ids[0];
-         last_bonus.slot_index       = slot_index;
-         last_bonus.rarity           = rarity;
-         last_bonus.cooldown_hr      = cooldown_hr;
-         last_bonus.energy           = energy;
-         last_bonus.energy_using     = energy_using;
-         last_bonus.blocks_count     = blocks_count;
-         last_bonus.house            = house;
-         last_bonus.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
-         last_bonus.mining_bonus     = mining_bonus;
-         last_bonus.minting_bonus    = minting_bonus;
-         last_bonus.current_time     = now();
+         LAND land_asset;
+         land_asset.asset_id         = asset_ids[0];
+         land_asset.slot_index       = slot_index;
+         land_asset.rarity           = rarity;
+         land_asset.cooldown_hr      = cooldown_hr;
+         land_asset.energy           = energy;
+         land_asset.energy_using     = energy_using;
+         land_asset.blocks_count     = blocks_count;
+         land_asset.house            = house;
+         land_asset.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
+         land_asset.mining_bonus     = mining_bonus;
+         land_asset.minting_bonus    = minting_bonus;
+         land_asset.current_time     = now();
 
          for(uint8_t i = 0; i < blocks_count; i++) {
             BLOCK new_block;
@@ -1647,7 +1643,7 @@ void game::on_transfer_nft(
             new_block.cooldown_hr   = 0;
             new_block.current_time  = 0;
 
-            last_bonus.blocks.push_back(new_block);
+            land_asset.blocks.push_back(new_block);
          }
 
          auto it_land = lands.find(from.value);
@@ -1670,7 +1666,7 @@ void game::on_transfer_nft(
          lands.modify(
             it_land,
             get_self(),
-            [&](auto& s) { s.lands.push_back(last_bonus); }
+            [&](auto& s) { s.lands.push_back(land_asset); }
          );
 
          players.modify(
@@ -1703,7 +1699,6 @@ void game::on_transfer_nft(
          house.coolingdown_bonus    = coolingdown_bonus;
          house.minting_bonus        = minting_bonus;
          house.current_time         = now();
-         house.last_bonus           = asset(0, config.get().CORE_TOKEN_SYMBOL);
 
          auto it_land = lands.find(from.value);
          check(it_land != lands.end(), "not found land table from account");

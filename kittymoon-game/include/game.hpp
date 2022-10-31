@@ -49,7 +49,6 @@ CONTRACT game : public contract {
          string         coolingdown_bonus;
          string         minting_bonus;
          uint64_t       current_time;
-         asset          last_bonus;
       };
 
       struct LAND {
