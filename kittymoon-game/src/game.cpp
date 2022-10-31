@@ -651,8 +651,9 @@ ACTION game::unstake(
             check(now() - it_land->lands[i].current_time >= it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
             //check(now() - it_land->lands[i].current_time >= 60 * 60 * it_land->lands[i].cooldown_hr, "the land has not yet completed cooldown");
 
-            check(it_player->energy >= it_land->lands[i].max_energy, "not enough energy for unstake land");
             check(it_land->lands[i].house.asset_id == 0, "can't unstake, you need to unstake house on this land first");
+            check(it_land->lands[i].energy >= it_land->lands[i].max_energy, "land not enough energy for unstake land");
+            check(it_player->energy >= it_land->lands[i].max_energy, "player not enough energy for unstake land");
 
             for(uint8_t a = 0; a < it_land->lands[i].blocks_count; a++) {
                check(it_land->lands[i].blocks[a].status == "ready", "can't unstake, the land has some block not ready");
@@ -702,7 +703,8 @@ ACTION game::unstake(
             check(it_player->tools_per_type - it_tool->toolcans.size() > tools_per_type_minus, "check and unstake watering can tools first");
             check(it_player->tools_per_type - it_tool->toolaxes.size() > tools_per_type_minus, "check and unstake axe tools first");
 
-            check(it_player->energy >= it_land->lands[i].house.max_energy, "not enough energy for unstake house");
+            check(it_land->lands[i].house.energy >= it_land->lands[i].house.max_energy, "house not enough energy for unstake house");
+            check(it_player->energy >= it_land->lands[i].house.max_energy, "player not enough energy for unstake house");
 
             players.modify(
                it_player,
@@ -1373,6 +1375,8 @@ ACTION game::claimland(
    check(now() - it_land->lands[land_num].current_time >= it_land->lands[land_num].cooldown_hr, "land can't claim, because cooldown not yet");
 
    uint32_t use_energy = it_land->lands[land_num].energy_using;
+
+   check(it_land->lands[land_num].energy >= use_energy, "land not enough energy");
    check(it_player->energy >= use_energy, "player not enough energy");
 
    asset land_bonus = it_land->lands[land_num].bonus;
@@ -1381,8 +1385,9 @@ ACTION game::claimland(
       it_land,
       get_self(),
       [&](auto& s) {
-         s.lands[land_num].current_time = now();
-         s.lands[land_num].bonus = asset(0, config.get().CORE_TOKEN_SYMBOL);
+         s.lands[land_num].energy       -= use_energy;
+         s.lands[land_num].current_time  = now();
+         s.lands[land_num].bonus         = asset(0, config.get().CORE_TOKEN_SYMBOL);
       }
    );
 
@@ -1466,12 +1471,17 @@ ACTION game::claimhouse(
    check(now() - it_land->lands[land_num].house.current_time >= it_land->lands[land_num].house.cooldown_hr, "house can't claim, because cooldown not yet");
 
    uint32_t use_energy = it_land->lands[land_num].house.energy_using;
+
+   check(it_land->lands[land_num].house.energy >= use_energy, "player not enough energy");
    check(it_player->energy >= use_energy, "player not enough energy");
 
    lands.modify(
       it_land,
       get_self(),
-      [&](auto& s) { s.lands[land_num].house.current_time = now(); }
+      [&](auto& s) {
+         s.lands[land_num].house.energy       -= use_energy;
+         s.lands[land_num].house.current_time  = now();
+      }
    );
 
    players.modify(
@@ -1541,10 +1551,10 @@ ACTION game::receiverand(
             it_bonusreward,
             it_randnumber->player_account,
             [&](auto& s) {
-               s.common.amount += sp_str == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
+               s.common.amount   += sp_str == "common" ? (gameconfig.get().reward_common.amount * (result / 100.0)) : 0;
                s.uncommon.amount += sp_str == "uncommon" ? (gameconfig.get().reward_uncommon.amount * (result / 100.0)) : 0;
-               s.rare.amount += sp_str == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
-               s.legend.amount += sp_str == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
+               s.rare.amount     += sp_str == "rare" ? (gameconfig.get().reward_rare.amount * (result / 100.0)) : 0;
+               s.legend.amount   += sp_str == "legendary" ? (gameconfig.get().reward_legend.amount * (result / 100.0)) : 0;
             }
          );
 
@@ -1560,8 +1570,8 @@ ACTION game::receiverand(
       [&](auto& s) {
          s.min_number = 0;
          s.max_number = 0;
-         s.status = "";
-         s.value = "";
+         s.status     = "";
+         s.value      = "";
       }
    );
 }
@@ -1700,6 +1710,7 @@ void game::on_transfer_nft(
          house.cooldown_hr          = 0;
          house.energy               = 0;
          house.energy_using         = 0;
+         house.max_energy           = 0;
          house.coolingdown_bonus    = "";
          house.minting_bonus        = "";
          house.current_time         = 0;
@@ -1711,6 +1722,7 @@ void game::on_transfer_nft(
          land_asset.cooldown_hr      = cooldown_hr;
          land_asset.energy           = energy;
          land_asset.energy_using     = energy_using;
+         land_asset.max_energy       = energy;
          land_asset.blocks_count     = blocks_count;
          land_asset.house            = house;
          land_asset.bonus            = asset(0, config.get().CORE_TOKEN_SYMBOL);
@@ -1755,8 +1767,8 @@ void game::on_transfer_nft(
             it_player,
             get_self(),
             [&](auto& s) {
-               s.energy += energy;
-               s.max_energy += energy;
+               s.energy     += max_energy;
+               s.max_energy += max_energy;
             }
          );
       }
@@ -1778,6 +1790,7 @@ void game::on_transfer_nft(
          house.cooldown_hr          = cooldown_hr;
          house.energy               = energy;
          house.energy_using         = energy_using;
+         house.max_energy           = energy;
          house.coolingdown_bonus    = coolingdown_bonus;
          house.minting_bonus        = minting_bonus;
          house.current_time         = now();
@@ -1812,8 +1825,8 @@ void game::on_transfer_nft(
             it_player,
             get_self(),
             [&](auto& s) {
-               s.energy += energy;
-               s.max_energy += energy;
+               s.energy         += max_energy;
+               s.max_energy     += max_energy;
                s.tools_per_type += tools_per_type_plus;
             }
          );
