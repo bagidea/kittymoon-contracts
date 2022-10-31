@@ -134,6 +134,20 @@ CONTRACT game : public contract {
          uint32_t    energy
       );
 
+      ACTION addenergyl(
+         name        authorized_account,
+         name        player_account,
+         uint64_t    asset_id,
+         uint32_t    energy
+      );
+
+      ACTION addenergyh(
+         name        authorized_account,
+         name        player_account,
+         uint64_t    asset_id,
+         uint32_t    energy
+      );
+
       ACTION unstake(
          name        player_account,
          uint64_t    asset_id

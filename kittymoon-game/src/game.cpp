@@ -531,6 +531,22 @@ ACTION game::addenergyt(
    }
 }
 
+ACTION game::addenergyl(
+   name        authorized_account,
+   name        player_account,
+   uint64_t    asset_id,
+   uint32_t    energy
+) {
+}
+
+ACTION game::addenergyh(
+   name        authorized_account,
+   name        player_account,
+   uint64_t    asset_id,
+   uint32_t    energy
+) {
+}
+
 ACTION game::unstake(
    name        player_account,
    uint64_t    asset_id
