@@ -419,9 +419,7 @@ ACTION game::addenergy(
    players.modify(
       it_player,
       get_self(),
-      [&](auto& s) {
-         s.energy += energy;
-      }
+      [&](auto& s) { s.energy += energy; }
    );
 }
 
@@ -537,6 +535,35 @@ ACTION game::addenergyl(
    uint64_t    asset_id,
    uint32_t    energy
 ) {
+   require_auth(authorized_account);
+
+   check(authorized_account == config.get().CORE_SHOP_ACCOUNT, "shop account not has permission");
+
+   auto it_player = players.find(player_account.value);
+   check(it_player != players.end(), "not found this account");
+
+   check(energy > 0, "incorrect energy amount");
+
+   auto it_land = lands.find(player_account.value);
+   check(it_land != lands.end(), "not found land table from account");
+
+   int8_t land_num = 0;
+
+   for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+      if(it_land->lands[i].asset_id == asset_id) {
+         land_num = i;
+         break;
+      }
+   }
+
+   check(land_num > 0, "not found land in account");
+   check(it_land->lands[land_num].energy + energy <= it_land->lands[land_num].max_energy, "overflow land energy");
+
+   lands.modify(
+      it_land,
+      get_self(),
+      [&](auto& s) { s.lands[land_num].energy += energy; }
+   );
 }
 
 ACTION game::addenergyh(
@@ -1783,8 +1810,8 @@ void game::on_transfer_nft(
             it_player,
             get_self(),
             [&](auto& s) {
-               s.energy     += max_energy;
-               s.max_energy += max_energy;
+               s.energy     += energy;
+               s.max_energy += energy;
             }
          );
       }
@@ -1841,8 +1868,8 @@ void game::on_transfer_nft(
             it_player,
             get_self(),
             [&](auto& s) {
-               s.energy         += max_energy;
-               s.max_energy     += max_energy;
+               s.energy         += energy;
+               s.max_energy     += energy;
                s.tools_per_type += tools_per_type_plus;
             }
          );
