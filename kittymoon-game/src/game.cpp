@@ -572,6 +572,35 @@ ACTION game::addenergyh(
    uint64_t    asset_id,
    uint32_t    energy
 ) {
+   require_auth(authorized_account);
+
+   check(authorized_account == config.get().CORE_SHOP_ACCOUNT, "shop account not has permission");
+
+   auto it_player = players.find(player_account.value);
+   check(it_player != players.end(), "not found this account");
+
+   check(energy > 0, "incorrect energy amount");
+
+   auto it_land = lands.find(player_account.value);
+   check(it_land != lands.end(), "not found land table from account");
+
+   int8_t land_num = 0;
+
+   for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+      if(it_land->lands[i].house.asset_id == asset_id) {
+         land_num = i;
+         break;
+      }
+   }
+
+   check(land_num > 0, "not found house in account");
+   check(it_land->lands[land_num].house.energy + energy <= it_land->lands[land_num].house.max_energy, "overflow house energy");
+
+   lands.modify(
+      it_land,
+      get_self(),
+      [&](auto& s) { s.lands[land_num].house.energy += energy; }
+   );
 }
 
 ACTION game::unstake(
