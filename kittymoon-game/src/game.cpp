@@ -1149,10 +1149,10 @@ ACTION game::harvesting(
                   it_randnumber,
                   get_self(),
                   [&](auto& s) {
-                     s.min_number  = min;
-                     s.max_number  = max;
-                     s.status      = "harvest_bonus";
-                     s.value       = rarity;
+                     s.min_number = min;
+                     s.max_number = max;
+                     s.status     = "harvest_bonus";
+                     s.value      = rarity;
                   }
                );
 
@@ -1162,11 +1162,24 @@ ACTION game::harvesting(
                   it_randnumber,
                   get_self(),
                   [&](auto& s) {
-                     s.value       += ":"+rarity;
+                     s.value += ":"+rarity;
                   }
                );
             }
          }
+      }
+
+      asset land_bonus = asset(0, config.get().CORE_TOKEN_SYMBOL);
+
+      if(land_num > 0) {
+         uint8_t mining_bonus = stoi(it_land->lands[land_num].mining_bonus.substr(0, 2));
+
+         land_bonus.amount += gameconfig.get().reward_common.amount * reward_common;
+         land_bonus.amount += gameconfig.get().reward_uncommon.amount * reward_uncommon;
+         land_bonus.amount += gameconfig.get().reward_rare.amount * reward_rare;
+         land_bonus.amount += gameconfig.get().reward_legend.amount * reward_legend;
+
+         land_bonus.amount = land_bonus.amount * (mining_bonus / 100.0);
       }
 
       lands.modify(
@@ -1177,6 +1190,7 @@ ACTION game::harvesting(
             s.lands[land_num].blocks[blocks_index[i]].rarity       = "";
             s.lands[land_num].blocks[blocks_index[i]].cooldown_hr  = 0;
             s.lands[land_num].blocks[blocks_index[i]].current_time = 0;
+            s.lands[land_num].bonus = land_bonus;
          }
       );
    }
@@ -1349,17 +1363,20 @@ ACTION game::claimland(
       }
    }
 
-   check(land_num > -1, "not found land in slot index");
+   check(land_num > 0, "not found land in slot index");
    check(now() - it_land->lands[land_num].current_time >= it_land->lands[land_num].cooldown_hr, "land can't claim, because cooldown not yet");
 
    uint32_t use_energy = it_land->lands[land_num].energy_using;
    check(it_player->energy >= use_energy, "player not enough energy");
+
+   asset land_bonus = it_land->lands[land_num].bonus;
 
    lands.modify(
       it_land,
       get_self(),
       [&](auto& s) {
          s.lands[land_num].current_time = now();
+         s.lands[land_num].bonus = asset(0, config.get().CORE_TOKEN_SYMBOL);
       }
    );
 
@@ -1371,24 +1388,47 @@ ACTION game::claimland(
       }
    );
 
-   action(
-      permission_level {
-         get_self(),
-         "active"_n
-      },
-      ASSETS_ACCOUNT,
-      "mintasset"_n,
-      make_tuple(
-         get_self(),
-         config.get().ASSETS_COLLECTION_NAME,
-         config.get().ASSETS_SCHEMA_LANDS,
-         nfttemplates.get().seed_pack_template_id,
-         player_account,
-         map<string, ATOMIC_ATTRIBUTE>(),
-         map<string, ATOMIC_ATTRIBUTE>(),
-         vector<asset>()
-      )         
-   ).send();
+   uint8_t i = stoi(it_land->lands[land_num].mining_bonus.substr(0, 1));
+
+   while(i > 0) {
+      action(
+         permission_level {
+            get_self(),
+            "active"_n
+         },
+         ASSETS_ACCOUNT,
+         "mintasset"_n,
+         make_tuple(
+            get_self(),
+            config.get().ASSETS_COLLECTION_NAME,
+            config.get().ASSETS_SCHEMA_LANDS,
+            nfttemplates.get().seed_pack_template_id,
+            player_account,
+            map<string, ATOMIC_ATTRIBUTE>(),
+            map<string, ATOMIC_ATTRIBUTE>(),
+            vector<asset>()
+         )         
+      ).send();
+
+      i--;
+   }
+
+   if(land_bonus.amount > 0) {
+      action(
+         permission_level {
+            get_self(),
+            "active"_n
+         },
+         config.get().CORE_TOKEN_ACCOUNT,
+         "issuesuper"_n,
+         make_tuple(
+            get_self(),
+            player_account,
+            land_bonus,
+            string("sell::rewards - issue")
+         )
+      ).send();
+   }
 }
 
 ACTION game::claimhouse(
