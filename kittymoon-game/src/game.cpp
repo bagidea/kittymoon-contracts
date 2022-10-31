@@ -1328,6 +1328,67 @@ ACTION game::claimland(
    uint8_t  slot_index
 ) {
    require_auth(player_account);
+
+   auto it_player = players.find(player_account.value);
+   check(it_player != players.end(), "not found player from account");
+
+   auto it_land = lands.find(player_account.value);
+   check(it_land != lands.end(), "not found land table from account");
+
+   if(slot_index == 0) check(it_land->lands.size() == 1, "can't claim land default");
+   else check(it_land->lands.size() > 1, "you don't have lands staking");
+
+   int8_t land_num = slot_index == 0 ? 0 : -1;
+
+   if(land_num == -1) {
+      for(uint8_t i = 1; i < it_land->lands.size(); i++) {
+         if(it_land->lands[i].slot_index == slot_index) {
+            land_num = i;
+            break;
+         }
+      }
+   }
+
+   check(land_num > -1, "not found land in slot index");
+   check(now() - it_land->lands[land_num].current_time >= it_land->lands[land_num].cooldown_hr, "land can't claim, because cooldown not yet");
+
+   uint32_t use_energy = it_land->lands[land_num].energy_using;
+   check(it_player->energy >= use_energy, "player not enough energy");
+
+   lands.modify(
+      it_land,
+      get_self(),
+      [&](auto& s) {
+         s.lands[land_num].current_time = now();
+      }
+   );
+
+   players.modify(
+      it_player,
+      get_self(),
+      [&](auto& s) {
+         s.energy -= use_energy;
+      }
+   );
+
+   action(
+      permission_level {
+         get_self(),
+         "active"_n
+      },
+      ASSETS_ACCOUNT,
+      "mintasset"_n,
+      make_tuple(
+         get_self(),
+         config.get().ASSETS_COLLECTION_NAME,
+         config.get().ASSETS_SCHEMA_LANDS,
+         nfttemplates.get().seed_pack_template_id,
+         player_account,
+         map<string, ATOMIC_ATTRIBUTE>(),
+         map<string, ATOMIC_ATTRIBUTE>(),
+         vector<asset>()
+      )         
+   ).send();
 }
 
 ACTION game::claimhouse(
@@ -1335,6 +1396,12 @@ ACTION game::claimhouse(
    uint8_t  slot_index
 ) {
    require_auth(player_account);
+
+   auto it_player = players.find(player_account.value);
+   check(it_player != players.end(), "not found player from account");
+
+   auto it_land = lands.find(player_account.value);
+   check(it_land != lands.end(), "not found land table from account [house]");
 }
 
 ACTION game::receiverand(
