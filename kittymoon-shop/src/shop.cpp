@@ -177,7 +177,7 @@ void shop::on_receive_token(
          amount--;
       }
    }
-   else if(memo.find("buy_energy") == 0 && memo == "buy_energy") {
+   else if(memo == "buy_energy") {
       check(get_first_receiver() == config.get().CORE_TOKEN_ACCOUNT && quantity.symbol == config.get().CORE_TOKEN_SYMBOL, "this token has not sopported");
 
       uint32_t amount = quantity.amount / math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision()) * config.get().price_energy_per_token;
@@ -242,6 +242,41 @@ void shop::on_receive_token(
             get_self(),
             quantity,
             string("buy::tool_energy - burned")
+         )         
+      ).send();
+   }
+   else if(memo.find("buy_energy_house:") == 0) {
+      check(get_first_receiver() == config.get().CORE_TOKEN_ACCOUNT && quantity.symbol == config.get().CORE_TOKEN_SYMBOL, "this token has not sopported");
+
+      int64_t land_id = stoull(memo.substr(17));
+      uint32_t amount = quantity.amount / math_pow(10, config.get().CORE_TOKEN_SYMBOL.precision()) * config.get().price_energy_per_token;
+
+      action(
+         permission_level {
+            get_self(),
+            "active"_n
+         },
+         config.get().CORE_GAME_ACCOUNT,
+         "addenergyl"_n,
+         make_tuple(
+            get_self(),
+            from,
+            land_id,
+            amount
+         )
+      ).send();
+
+      action(
+         permission_level {
+            get_self(),
+            "active"_n
+         },
+         config.get().CORE_TOKEN_ACCOUNT,
+         "burn"_n,
+         make_tuple(
+            get_self(),
+            quantity,
+            string("buy::land_energy - burned")
          )         
       ).send();
    } else {
