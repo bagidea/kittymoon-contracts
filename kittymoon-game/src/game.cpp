@@ -1876,7 +1876,7 @@ void game::on_transfer_nft(
 
          for(uint8_t i = 1; i < it_land->lands.size(); i++) {
             if(it_land->lands[i].slot_index == slot_index) {
-               check(it_land->lands[i].house.asset_id != 0, "this land has stake house already");
+               check(it_land->lands[i].house.asset_id == 0, "this land has stake house already");
 
                selected = i;
                break;
