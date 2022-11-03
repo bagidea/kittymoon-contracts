@@ -79,7 +79,8 @@ CONTRACT game : public contract {
          name     ASSETS_SCHEMA_SEEDS,
          name     ASSETS_SCHEMA_TOOLS,
          name     ASSETS_SCHEMA_LANDS,
-         name     ASSETS_SCHEMA_HOUSE
+         name     ASSETS_SCHEMA_HOUSE,
+         name     ASSETS_SCHEMA_PACKS
       );
 
       ACTION setgameconfig(
@@ -225,6 +226,7 @@ CONTRACT game : public contract {
          name     ASSETS_SCHEMA_TOOLS;
          name     ASSETS_SCHEMA_LANDS;
          name     ASSETS_SCHEMA_HOUSE;
+         name     ASSETS_SCHEMA_PACKS;
       };
 
       typedef singleton<"config"_n, config_init> config_t;

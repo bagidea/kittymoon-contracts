@@ -8,7 +8,8 @@ ACTION game::setconfig(
    name     ASSETS_SCHEMA_SEEDS,
    name     ASSETS_SCHEMA_TOOLS,
    name     ASSETS_SCHEMA_LANDS,
-   name     ASSETS_SCHEMA_HOUSE
+   name     ASSETS_SCHEMA_HOUSE,
+   name     ASSETS_SCHEMA_PACKS
 ) {
    require_auth(get_self());
 
@@ -21,7 +22,8 @@ ACTION game::setconfig(
          .ASSETS_SCHEMA_SEEDS     = ASSETS_SCHEMA_SEEDS,
          .ASSETS_SCHEMA_TOOLS     = ASSETS_SCHEMA_TOOLS,
          .ASSETS_SCHEMA_LANDS     = ASSETS_SCHEMA_LANDS,
-         .ASSETS_SCHEMA_HOUSE     = ASSETS_SCHEMA_HOUSE
+         .ASSETS_SCHEMA_HOUSE     = ASSETS_SCHEMA_HOUSE,
+         .ASSETS_SCHEMA_PACKS     = ASSETS_SCHEMA_PACKS
       },
       get_self()
    );
@@ -1482,7 +1484,7 @@ ACTION game::claimland(
          make_tuple(
             get_self(),
             config.get().ASSETS_COLLECTION_NAME,
-            config.get().ASSETS_SCHEMA_LANDS,
+            config.get().ASSETS_SCHEMA_PACKS,
             nfttemplates.get().seed_pack_template_id,
             player_account,
             map<string, ATOMIC_ATTRIBUTE>(),
@@ -1575,7 +1577,7 @@ ACTION game::claimhouse(
          make_tuple(
             get_self(),
             config.get().ASSETS_COLLECTION_NAME,
-            config.get().ASSETS_SCHEMA_LANDS,
+            config.get().ASSETS_SCHEMA_PACKS,
             nfttemplates.get().tool_pack_template_id,
             player_account,
             map<string, ATOMIC_ATTRIBUTE>(),
