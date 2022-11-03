@@ -925,8 +925,8 @@ ACTION game::preparing(
       it_tool,
       get_self(),
       [&](auto& s) {
-         s.toolhoes[selected].energy       -= use_energy;
-         s.toolhoes[selected].current_time  = now() + coolingdown_bonus;
+         s.toolhoes[selected].energy      -= use_energy;
+         s.toolhoes[selected].current_time = now() - coolingdown_bonus;
       }
    );
 }
@@ -1074,7 +1074,7 @@ ACTION game::watering(
          [&](auto& s) {
             s.lands[land_num].blocks[blocks_index[i]].status       = "harvesting";
             s.lands[land_num].blocks[blocks_index[i]].cooldown_hr  = gameconfig.get().cooldown_growing;
-            s.lands[land_num].blocks[blocks_index[i]].current_time = now() + coolingdown_bonus;
+            s.lands[land_num].blocks[blocks_index[i]].current_time = now() - coolingdown_bonus;
          }
       );
    }
@@ -1092,7 +1092,7 @@ ACTION game::watering(
       get_self(),
       [&](auto& s) {
          s.toolcans[selected].energy      -= use_energy;
-         s.toolcans[selected].current_time = now() + coolingdown_bonus;
+         s.toolcans[selected].current_time = now() - coolingdown_bonus;
       }
    );
 }
@@ -1314,7 +1314,7 @@ ACTION game::harvesting(
       get_self(),
       [&](auto& s) {
          s.toolaxes[selected].energy      -= use_energy;
-         s.toolaxes[selected].current_time = now() + coolingdown_bonus;
+         s.toolaxes[selected].current_time = now() - coolingdown_bonus;
       }
    );
 
